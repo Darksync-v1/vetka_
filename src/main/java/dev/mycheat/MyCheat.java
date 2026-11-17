@@ -78,22 +78,23 @@ public class MyCheat implements ClientModInitializer {
     }
 
     private static void drawHud(DrawContext ctx) {
-        var tr = mc.textRenderer;
+        MinecraftClient client = MinecraftClient.getInstance();
+        var tr = client.textRenderer;
         int y = 4;
         for (var m : MODULES.getAll()) {
             if (!m.isEnabled()) continue;
             int w = tr.getWidth(m.getName());
-            ctx.drawTextWithShadow(tr, "§d" + m.getName(), mc.getWindow().getScaledWidth() - w - 6, y, 0xFFFFFF);
+            ctx.drawTextWithShadow(tr, "§d" + m.getName(), client.getWindow().getScaledWidth() - w - 6, y, 0xFFFFFF);
             y += 10;
         }
         long now = System.currentTimeMillis();
-        int ny = mc.getWindow().getScaledHeight() - 24;
+        int ny = client.getWindow().getScaledHeight() - 24;
         for (Notifications.Entry e : Notifications.active()) {
             float age = (now - e.time()) / 2500f;
             int alpha = (int) (255 * (age < 0.8f ? 1f : (1f - age) / 0.2f));
             String text = (e.enabled() ? "§a» §f" : "§c» §f") + e.name();
             int w = tr.getWidth(text);
-            int bx = mc.getWindow().getScaledWidth() - w - 14;
+            int bx = client.getWindow().getScaledWidth() - w - 14;
             ctx.fill(bx - 4, ny - 2, bx + w + 6, ny + 9, (alpha << 24 & 0xFF000000) | 0x14141E);
             ctx.drawTextWithShadow(tr, text, bx, ny, 0xFFFFFF | (alpha << 24));
             ny -= 12;
