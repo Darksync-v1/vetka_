@@ -1,9 +1,10 @@
 package dev.mycheat.module.impl;
 
+import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 
 public class Fly extends Module {
-    public Fly() { super("Fly"); }
+    public Fly() { super("Fly", Category.MOVEMENT, "Полёт как в креативе, в том числе в режиме выживания."); }
     @Override public void onTick() {
         mc.player.getAbilities().allowFlying = true;
         mc.player.getAbilities().flying = true;

@@ -1,5 +1,6 @@
 package dev.mycheat.module.impl;
 
+import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
 
@@ -7,5 +8,5 @@ import dev.mycheat.setting.NumberSetting;
 public class Velocity extends Module {
     public final NumberSetting horizontal = add(new NumberSetting("Horizontal %", 0, 0, 100, 5));
     public final NumberSetting vertical = add(new NumberSetting("Vertical %", 0, 0, 100, 5));
-    public Velocity() { super("Velocity"); }
+    public Velocity() { super("Velocity", Category.COMBAT, "Уменьшает или полностью убирает отбрасывание от ударов. Слайдеры задают, сколько процентов оставить."); }
 }

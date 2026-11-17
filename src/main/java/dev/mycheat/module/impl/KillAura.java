@@ -1,5 +1,6 @@
 package dev.mycheat.module.impl;
 
+import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
 import net.minecraft.entity.Entity;
@@ -17,11 +18,11 @@ public class KillAura extends Module {
     private final NumberSetting players = add(new NumberSetting("Players", 1, 0, 1, 1));
     private final NumberSetting mobs = add(new NumberSetting("Mobs", 1, 0, 1, 1));
 
-    public KillAura() { super("KillAura"); }
+    public KillAura() { super("KillAura", Category.COMBAT, "Автоматически бьёт ближайшую цель в радиусе Range. Поворот уходит пакетом (камера не дёргается), удар по кулдауну. Друзья и боты пропускаются."); }
 
     private boolean valid(Entity e) {
         if (e == mc.player || !(e instanceof LivingEntity le) || !le.isAlive()) return false;
-        if (e instanceof PlayerEntity pl) return players.getInt() == 1 && !pl.isSpectator() && !pl.isCreative();
+        if (e instanceof PlayerEntity pl) return players.getInt() == 1 && !AntiBot.isBot(e) && !dev.mycheat.util.Friends.isFriend(e) && !pl.isSpectator() && !pl.isCreative();
         return mobs.getInt() == 1 && e instanceof HostileEntity;
     }
 
@@ -43,6 +44,7 @@ public class KillAura extends Module {
             if (d <= best) { best = d; target = e; }
         }
         if (target == null) return;
+        dev.mycheat.module.Targets.set(target);
 
         Vec3d c = target.getBoundingBox().getCenter();
         double dx = c.x - eyes.x, dy = c.y - eyes.y, dz = c.z - eyes.z;

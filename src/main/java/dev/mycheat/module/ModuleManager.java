@@ -6,9 +6,12 @@ import java.util.List;
 
 public class ModuleManager {
     private final List<Module> modules = List.of(
-            new Sprint(), new Fly(), new Speed(), new Fullbright(), new NoFall(),
-            new Step(), new AutoTotem(), new ESP(), new KillAura(), new Velocity(), new Jesus(),
-            new ElytraFly(), new ElytraAura());
+            new KillAura(), new ElytraAura(), new TPAura(), new Criticals(), new AntiBot(),
+            new TargetStrafe(), new AutoTotem(), new Velocity(),
+            new Sprint(), new Fly(), new Speed(), new Step(), new Jesus(), new ElytraFly(),
+            new Phase(), new ClickTP(), new NoFall(),
+            new Fullbright(), new ESP(), new TargetESP(),
+            new FakeLag(), new Boost(), new NoSlow());
 
     public List<Module> getAll() { return modules; }
 

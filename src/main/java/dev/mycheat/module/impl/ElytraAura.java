@@ -1,5 +1,6 @@
 package dev.mycheat.module.impl;
 
+import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
 import net.minecraft.entity.Entity;
@@ -18,7 +19,7 @@ public class ElytraAura extends Module {
     private final NumberSetting speed = add(new NumberSetting("Speed", 1.6, 0.5, 4.0, 0.1));
     private final NumberSetting reach = add(new NumberSetting("Reach", 10.0, 2.0, 12.0, 0.5));
 
-    public ElytraAura() { super("ElytraAura"); }
+    public ElytraAura() { super("ElytraAura", Category.COMBAT, "В полёте на элитрах сама подлетает к ближайшему игроку в радиусе Range и бьёт его, когда он ближе Reach."); }
 
     @Override public void onTick() {
         var p = mc.player;
@@ -27,11 +28,12 @@ public class ElytraAura extends Module {
         Entity target = null;
         double best = range.get() * range.get();
         for (Entity e : mc.world.getEntities()) {
-            if (e == p || !(e instanceof PlayerEntity pl) || !pl.isAlive() || pl.isSpectator() || pl.isCreative()) continue;
+            if (e == p || !(e instanceof PlayerEntity pl) || !pl.isAlive() || pl.isSpectator() || pl.isCreative() || AntiBot.isBot(pl) || dev.mycheat.util.Friends.isFriend(pl)) continue;
             double d = e.squaredDistanceTo(p);
             if (d <= best) { best = d; target = e; }
         }
         if (target == null) return;
+        dev.mycheat.module.Targets.set(target);
 
         Vec3d eyes = p.getEyePos();
         Vec3d c = target.getBoundingBox().getCenter();
