@@ -28,12 +28,12 @@ public class ElytraAura extends Module {
     }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         if (!p.isFallFlying()) return;
 
         Entity target = null;
         double best = range.get() * range.get();
-        for (Entity e : mc.world.getEntities()) {
+        for (Entity e : mc().world.getEntities()) {
             if (e == p || !(e instanceof PlayerEntity pl) || !pl.isAlive() || pl.isSpectator() || pl.isCreative()
                     || AntiBot.isBot(pl) || Friends.isFriend(pl)) continue;
             double d = e.squaredDistanceTo(p);
@@ -58,7 +58,7 @@ public class ElytraAura extends Module {
         }
 
         if (dist <= reach.get() && p.getAttackCooldownProgress(0.5f) >= 0.95f) {
-            mc.interactionManager.attackEntity(p, target);
+            mc().interactionManager.attackEntity(p, target);
             p.swingHand(Hand.MAIN_HAND);
         }
     }

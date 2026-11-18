@@ -19,7 +19,7 @@ public class Boost extends Module {
     }
 
     @Override protected void onEnable() {
-        var o = mc.options;
+        var o = mc().options;
         oldParticles = o.getParticles().getValue();
         oldClouds = o.getCloudRenderMode().getValue();
         oldShadows = o.getEntityShadows().getValue();
@@ -34,7 +34,7 @@ public class Boost extends Module {
     }
 
     @Override protected void onDisable() {
-        var o = mc.options;
+        var o = mc().options;
         if (oldParticles == null) return;
         o.getParticles().setValue(oldParticles);
         o.getCloudRenderMode().setValue(oldClouds);

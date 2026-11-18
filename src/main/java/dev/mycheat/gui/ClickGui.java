@@ -7,11 +7,9 @@ import dev.mycheat.setting.NumberSetting;
 import dev.mycheat.util.Config;
 import dev.mycheat.util.Friends;
 import dev.mycheat.util.RenderUtil;
-import dev.mycheat.module.impl.GuiMove;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
@@ -20,11 +18,10 @@ import java.util.List;
 /**
  * Меню по колонкам-категориям.
  * ЛКМ по модулю: вкл/выкл. ПКМ: настройки. СКМ: назначить клавишу (Delete — снять, Esc — отмена).
- * Наведи мышь на модуль, чтобы увидеть описание. Список друзей справа, клик по нику убирает друга.
+ * Список друзей справа, клик по нику убирает друга.
  */
 public class ClickGui extends Screen {
     private static final int W = 124, HEAD = 18, ROW = 16, SROW = 14, GAP = 8;
-    // ACCENT теперь считается каждый кадр как переливающийся цвет
 
     private record Region(int x1, int y1, int x2, int y2, Module module, NumberSetting setting, String friend) {
         boolean has(double mx, double my) { return mx >= x1 && mx < x2 && my >= y1 && my < y2; }
@@ -33,9 +30,6 @@ public class ClickGui extends Screen {
     private final List<Region> regions = new ArrayList<>();
     private Module expanded, binding;
     private Region dragging;
-    private static int offsetX, offsetY;
-    private boolean movingGui;
-    private double moveFromX, moveFromY;
 
     public ClickGui() { super(Text.literal("Vetka v1")); }
 
@@ -55,21 +49,19 @@ public class ClickGui extends Screen {
     @Override
     public void render(DrawContext ctx, int mx, int my, float delta) {
         regions.clear();
-        int ACCENT = RenderUtil.rainbow(System.currentTimeMillis() / 1000.0, 0);
+        int accent = RenderUtil.rainbow(System.currentTimeMillis() / 1000.0, 0);
         ctx.fill(0, 0, width, height, 0x90000000);
-        ctx.drawCenteredTextWithShadow(textRenderer, "Vetka v1", width / 2, 6, ACCENT);
+        ctx.drawCenteredTextWithShadow(textRenderer, "Vetka v1", width / 2, 6, accent);
 
         Category[] cats = Category.values();
         int panels = cats.length + 1;
-        int startX = (width - (panels * W + (panels - 1) * GAP)) / 2 + offsetX;
-        int top = 22 + offsetY;
-        Module hovered = null;
+        int startX = (width - (panels * W + (panels - 1) * GAP)) / 2;
+        int top = 22;
 
         for (int i = 0; i < cats.length; i++) {
             int x = startX + i * (W + GAP), y = top;
             ctx.fill(x, y, x + W, y + HEAD, 0xF0221833);
-            ctx.drawCenteredTextWithShadow(textRenderer, cats[i].title, x + W / 2, y + 5, ACCENT);
-            regions.add(new Region(x, y, x + W, y + HEAD, null, null, "\u0000header"));
+            ctx.drawCenteredTextWithShadow(textRenderer, cats[i].title, x + W / 2, y + 5, accent);
             y += HEAD;
             for (Module m : MyCheat.MODULES.getAll()) {
                 if (m.getCategory() != cats[i]) continue;
@@ -82,7 +74,6 @@ public class ClickGui extends Screen {
                 if (!m.getSettings().isEmpty()) right += expanded == m ? " -" : " +";
                 ctx.drawTextWithShadow(textRenderer, right, x + W - 5 - textRenderer.getWidth(right), y + 4, 0x9A9AB0);
                 regions.add(new Region(x, y, x + W, y + ROW, m, null, null));
-                if (hov) hovered = m;
                 y += ROW;
 
                 if (expanded == m) {
@@ -100,7 +91,7 @@ public class ClickGui extends Screen {
         // друзья
         int fx = startX + cats.length * (W + GAP), fy = top;
         ctx.fill(fx, fy, fx + W, fy + HEAD, 0xF0221833);
-        ctx.drawCenteredTextWithShadow(textRenderer, "Друзья", fx + W / 2, fy + 5, ACCENT);
+        ctx.drawCenteredTextWithShadow(textRenderer, "Friends", fx + W / 2, fy + 5, accent);
         fy += HEAD;
         List<String> friends = Friends.all();
         if (friends.isEmpty()) {
@@ -117,20 +108,8 @@ public class ClickGui extends Screen {
             fy += ROW;
         }
 
-        // подсказка внизу
         ctx.drawCenteredTextWithShadow(textRenderer,
-                (GuiMove.enabled() ? "Перетащи меню за любой заголовок (GuiMove включён)" : "ЛКМ — вкл/выкл   ПКМ — настройки   СКМ — бинд   Right Shift — закрыть"), width / 2, height - 12, 0x9A9AB0);
-
-        // всплывающее описание на русском
-        if (hovered != null && binding == null && dragging == null) {
-            List<OrderedText> lines = textRenderer.wrapLines(Text.literal(hovered.getDescription()), 170);
-            int bw = 178, bh = lines.size() * 10 + 8;
-            int bx = Math.min(mx + 10, width - bw - 4), by = Math.min(my + 10, height - bh - 4);
-            ctx.fill(bx, by, bx + bw, by + bh, 0xF0100014);
-            ctx.fill(bx, by, bx + 2, by + bh, ACCENT);
-            int ly = by + 4;
-            for (OrderedText l : lines) { ctx.drawTextWithShadow(textRenderer, l, bx + 6, ly, 0xFFFFFF); ly += 10; }
-        }
+                "ЛКМ — вкл/выкл   ПКМ — настройки   СКМ — бинд   Right Shift — закрыть", width / 2, height - 12, 0x9A9AB0);
     }
 
     private void slide(Region r, double mx) {
@@ -144,9 +123,6 @@ public class ClickGui extends Screen {
         binding = null;
         for (Region r : regions) {
             if (!r.has(mx, my)) continue;
-            if ("\u0000header".equals(r.friend()) && GuiMove.enabled() && button == 0) {
-                movingGui = true; moveFromX = mx; moveFromY = my; return true;
-            }
             if (r.setting() != null) {
                 if (button == 0) { dragging = r; slide(r, mx); }
             } else if (r.friend() != null) {
@@ -165,14 +141,13 @@ public class ClickGui extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (movingGui) { offsetX += (int) dx; offsetY += (int) dy; return true; }
         if (dragging != null) { slide(dragging, mx); return true; }
         return super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
-        dragging = null; movingGui = false;
+        dragging = null;
         return super.mouseReleased(mx, my, button);
     }
 

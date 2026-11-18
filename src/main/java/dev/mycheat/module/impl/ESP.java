@@ -21,19 +21,19 @@ public class ESP extends Module {
     }
 
     @Override public void onTick() {
-        for (Entity e : mc.world.getEntities())
-            if (e instanceof PlayerEntity pl && pl != mc.player) pl.setGlowing(glow.getInt() == 1);
+        for (Entity e : mc().world.getEntities())
+            if (e instanceof PlayerEntity pl && pl != mc().player) pl.setGlowing(glow.getInt() == 1);
     }
     @Override protected void onDisable() {
-        for (Entity e : mc.world.getEntities()) if (e instanceof PlayerEntity pl) pl.setGlowing(false);
+        for (Entity e : mc().world.getEntities()) if (e instanceof PlayerEntity pl) pl.setGlowing(false);
     }
 
     public void render(WorldRenderContext ctx) {
         if (box.getInt() == 0 || ctx.matrixStack() == null) return;
         float delta = ctx.tickCounter().getTickDelta(false);
         Vec3d cam = ctx.camera().getPos();
-        for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof PlayerEntity pl) || pl == mc.player) continue;
+        for (Entity e : mc().world.getEntities()) {
+            if (!(e instanceof PlayerEntity pl) || pl == mc().player) continue;
             double x = MathHelper.lerp(delta, e.prevX, e.getX()) - cam.x;
             double y = MathHelper.lerp(delta, e.prevY, e.getY()) - cam.y;
             double z = MathHelper.lerp(delta, e.prevZ, e.getZ()) - cam.z;

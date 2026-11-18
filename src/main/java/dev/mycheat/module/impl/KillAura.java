@@ -21,19 +21,19 @@ public class KillAura extends Module {
     public KillAura() { super("KillAura", Category.COMBAT, "Автоматически бьёт ближайшую цель в радиусе Range. Поворот уходит пакетом (камера не дёргается), удар по кулдауну. Друзья и боты пропускаются."); }
 
     private boolean valid(Entity e) {
-        if (e == mc.player || !(e instanceof LivingEntity le) || !le.isAlive()) return false;
+        if (e == mc().player || !(e instanceof LivingEntity le) || !le.isAlive()) return false;
         if (e instanceof PlayerEntity pl) return players.getInt() == 1 && !AntiBot.isBot(e) && !dev.mycheat.util.Friends.isFriend(e) && !pl.isSpectator() && !pl.isCreative();
         return mobs.getInt() == 1 && e instanceof HostileEntity;
     }
 
     @Override public void onTick() {
-        var p = mc.player;
-        if (mc.currentScreen != null || p.getAttackCooldownProgress(0.5f) < 0.95f) return;
+        var p = mc().player;
+        if (mc().currentScreen != null || p.getAttackCooldownProgress(0.5f) < 0.95f) return;
 
         Entity target = null;
         double best = range.get() * range.get();
         Vec3d eyes = p.getEyePos();
-        for (Entity e : mc.world.getEntities()) {
+        for (Entity e : mc().world.getEntities()) {
             if (!valid(e)) continue;
             double d = e.getBoundingBox().getCenter().squaredDistanceTo(eyes);
             // дистанция до ближайшей точки хитбокса, как считает сервер
@@ -54,7 +54,7 @@ public class KillAura extends Module {
         // silent rotation: сервер видит поворот, камера не дёргается
         p.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(
                 MathHelper.wrapDegrees(yaw), MathHelper.clamp(pitch, -90f, 90f), p.isOnGround()));
-        mc.interactionManager.attackEntity(p, target);
+        mc().interactionManager.attackEntity(p, target);
         p.swingHand(Hand.MAIN_HAND);
     }
 }

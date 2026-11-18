@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Module {
-    protected static final MinecraftClient mc = MinecraftClient.getInstance();
+    protected static MinecraftClient mc() { return MinecraftClient.getInstance(); }
     private final String name;
     private final Category category;
     private final String description;

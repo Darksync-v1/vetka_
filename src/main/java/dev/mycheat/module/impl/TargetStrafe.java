@@ -19,7 +19,7 @@ public class TargetStrafe extends Module {
 
     @Override public void onTick() {
         Entity t = Targets.get();
-        var p = mc.player;
+        var p = mc().player;
         if (t == null || p.input.movementForward <= 0 || p.isTouchingWater()) return;
         if (p.horizontalCollision) dir = -dir;
         double dx = p.getX() - t.getX(), dz = p.getZ() - t.getZ();

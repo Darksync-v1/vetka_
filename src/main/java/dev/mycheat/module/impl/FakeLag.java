@@ -26,9 +26,9 @@ public class FakeLag extends Module {
     }
 
     private void flush() {
-        if (mc.player == null) { queue.clear(); return; }
+        if (mc().player == null) { queue.clear(); return; }
         flushing = true;
-        for (Packet<?> p : queue) mc.player.networkHandler.sendPacket(p);
+        for (Packet<?> p : queue) mc().player.networkHandler.sendPacket(p);
         queue.clear();
         flushing = false;
     }

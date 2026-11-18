@@ -10,15 +10,15 @@ public class Phase extends Module {
     }
 
     private boolean inside() {
-        return mc.world.getBlockCollisions(mc.player, mc.player.getBoundingBox()).iterator().hasNext();
+        return mc().world.getBlockCollisions(mc().player, mc().player.getBoundingBox()).iterator().hasNext();
     }
 
     public boolean shouldClip() {
-        return mc.player.horizontalCollision || inside();
+        return mc().player.horizontalCollision || inside();
     }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         boolean clip = p.horizontalCollision || inside();
         p.setNoGravity(clip);
         if (clip) {
@@ -26,5 +26,5 @@ public class Phase extends Module {
             p.setVelocity(p.getVelocity().x, vy, p.getVelocity().z);
         }
     }
-    @Override protected void onDisable() { mc.player.setNoGravity(false); mc.player.noClip = false; }
+    @Override protected void onDisable() { mc().player.setNoGravity(false); mc().player.noClip = false; }
 }

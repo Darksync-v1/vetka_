@@ -25,7 +25,7 @@ public class Jesus extends Module {
     }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         if (p.isSneaking() || p.isFallFlying() || p.getAbilities().flying) return;
         Vec3d v = p.getVelocity();
 

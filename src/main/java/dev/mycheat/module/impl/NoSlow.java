@@ -17,7 +17,7 @@ public class NoSlow extends Module {
     }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         boolean slowed = p.isUsingItem() || p.isBlocking();
         if (!slowed) return;
         float f = p.input.movementForward, s = p.input.movementSideways;

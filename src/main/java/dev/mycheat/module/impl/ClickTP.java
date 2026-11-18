@@ -17,7 +17,7 @@ public class ClickTP extends Module {
 
     /** Вызывается из MyCheat по нажатию СКМ. */
     public void teleport() {
-        var p = mc.player;
+        var p = mc().player;
         HitResult hit = p.raycast(range.get(), 1.0f, false);
         if (!(hit instanceof BlockHitResult b) || b.getType() != HitResult.Type.BLOCK) return;
         Vec3d to = Vec3d.ofBottomCenter(b.getBlockPos().offset(b.getSide()));

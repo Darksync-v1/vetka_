@@ -13,7 +13,7 @@ public class Criticals extends Module {
     public Criticals() { super("Criticals", Category.COMBAT, "Критические удары без прыжка: перед ударом отправляет пакеты короткого подскока."); }
 
     public void onAttack() {
-        var p = mc.player;
+        var p = mc().player;
         if (TPAura.active || p == null || !p.isOnGround() || p.isTouchingWater() || p.isInLava()
                 || p.isClimbing() || p.hasVehicle() || p.getAbilities().flying) return;
         double x = p.getX(), y = p.getY(), z = p.getZ();

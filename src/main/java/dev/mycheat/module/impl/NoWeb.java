@@ -16,9 +16,9 @@ public class NoWeb extends Module {
     }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         BlockPos pos = BlockPos.ofFloored(p.getX(), p.getY(), p.getZ());
-        if (mc.world.getBlockState(pos).isOf(Blocks.COBWEB)) {
+        if (mc().world.getBlockState(pos).isOf(Blocks.COBWEB)) {
             float f = p.input.movementForward, s = p.input.movementSideways;
             if (f == 0 && s == 0) return;
             double yaw = Math.toRadians(p.getYaw());

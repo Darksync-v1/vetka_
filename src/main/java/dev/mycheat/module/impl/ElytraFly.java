@@ -13,7 +13,7 @@ public class ElytraFly extends Module {
     public ElytraFly() { super("ElytraFly", Category.MOVEMENT, "Полёт на элитрах без фейерверков: W — вперёд по взгляду, Пробел и Shift — вверх и вниз. Элитры раскрой сам."); }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         if (!p.isFallFlying()) return; // элитры нужно раскрыть обычным способом: прыжок в воздухе
         Vec3d look = p.getRotationVec(1.0f);
         Vec3d v = Vec3d.ZERO;

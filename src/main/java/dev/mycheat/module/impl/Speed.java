@@ -15,7 +15,7 @@ public class Speed extends Module {
     }
 
     @Override public void onTick() {
-        var p = mc.player;
+        var p = mc().player;
         float f = p.input.movementForward, s = p.input.movementSideways;
         if ((f == 0 && s == 0) || p.isTouchingWater() || p.isInLava() || p.isFallFlying()
                 || p.isClimbing() || p.getAbilities().flying) { cur = 0; return; }

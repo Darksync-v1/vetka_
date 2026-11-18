@@ -22,12 +22,12 @@ public class TPAura extends Module {
     }
 
     @Override public void onTick() {
-        var p = mc.player;
-        if (mc.currentScreen != null || p.getAttackCooldownProgress(0.5f) < 0.95f) return;
+        var p = mc().player;
+        if (mc().currentScreen != null || p.getAttackCooldownProgress(0.5f) < 0.95f) return;
 
         Entity target = null;
         double best = range.get() * range.get();
-        for (Entity e : mc.world.getEntities()) {
+        for (Entity e : mc().world.getEntities()) {
             if (e == p || !(e instanceof PlayerEntity pl) || !pl.isAlive() || pl.isSpectator() || pl.isCreative()
                     || AntiBot.isBot(pl) || Friends.isFriend(pl)) continue;
             double d = e.squaredDistanceTo(p);
@@ -47,7 +47,7 @@ public class TPAura extends Module {
         active = true;
         try {
             if (moved) Tp.send(p, from, dest, step.get(), false);
-            mc.interactionManager.attackEntity(p, target);
+            mc().interactionManager.attackEntity(p, target);
             p.swingHand(Hand.MAIN_HAND);
             if (moved) Tp.send(p, dest, from, step.get(), p.isOnGround());
         } finally { active = false; }

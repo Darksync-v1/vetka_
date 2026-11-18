@@ -19,8 +19,8 @@ public class AntiBot extends Module {
         AntiBot m = MyCheat.MODULES.get(AntiBot.class);
         if (m == null || !m.isEnabled() || !(e instanceof PlayerEntity p)) return false;
         // настоящие игроки есть в списке игроков (tab)
-        if (m.tab.getInt() == 1 && mc.getNetworkHandler() != null
-                && mc.getNetworkHandler().getPlayerListEntry(p.getUuid()) == null) return true;
+        if (m.tab.getInt() == 1 && mc().getNetworkHandler() != null
+                && mc().getNetworkHandler().getPlayerListEntry(p.getUuid()) == null) return true;
         // у настоящих аккаунтов UUID версии 4, у NPC часто версия 2 и др.
         if (m.uuid.getInt() == 1 && p.getUuid().version() != 4) return true;
         // ник игрока: 3-16 символов, буквы, цифры, _
