@@ -31,7 +31,7 @@ public abstract class Module {
 
     public void toggle() {
         enabled = !enabled;
-        if (mc.player == null) return;
+        if (mc().player == null) return;
         if (enabled) onEnable(); else onDisable();
         dev.mycheat.util.Notifications.add(name, enabled);
     }
