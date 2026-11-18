@@ -7,6 +7,7 @@ import dev.mycheat.setting.NumberSetting;
 import dev.mycheat.util.Config;
 import dev.mycheat.util.Friends;
 import dev.mycheat.util.RenderUtil;
+import dev.mycheat.module.impl.GuiMove;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
@@ -32,6 +33,9 @@ public class ClickGui extends Screen {
     private final List<Region> regions = new ArrayList<>();
     private Module expanded, binding;
     private Region dragging;
+    private static int offsetX, offsetY;
+    private boolean movingGui;
+    private double moveFromX, moveFromY;
 
     public ClickGui() { super(Text.literal("Vetka v1")); }
 
@@ -57,14 +61,15 @@ public class ClickGui extends Screen {
 
         Category[] cats = Category.values();
         int panels = cats.length + 1;
-        int startX = (width - (panels * W + (panels - 1) * GAP)) / 2;
-        int top = 22;
+        int startX = (width - (panels * W + (panels - 1) * GAP)) / 2 + offsetX;
+        int top = 22 + offsetY;
         Module hovered = null;
 
         for (int i = 0; i < cats.length; i++) {
             int x = startX + i * (W + GAP), y = top;
             ctx.fill(x, y, x + W, y + HEAD, 0xF0221833);
             ctx.drawCenteredTextWithShadow(textRenderer, cats[i].title, x + W / 2, y + 5, ACCENT);
+            regions.add(new Region(x, y, x + W, y + HEAD, null, null, "\u0000header"));
             y += HEAD;
             for (Module m : MyCheat.MODULES.getAll()) {
                 if (m.getCategory() != cats[i]) continue;
@@ -114,7 +119,7 @@ public class ClickGui extends Screen {
 
         // подсказка внизу
         ctx.drawCenteredTextWithShadow(textRenderer,
-                "ЛКМ — вкл/выкл   ПКМ — настройки   СКМ — бинд   Right Shift — закрыть", width / 2, height - 12, 0x9A9AB0);
+                (GuiMove.enabled() ? "Перетащи меню за любой заголовок (GuiMove включён)" : "ЛКМ — вкл/выкл   ПКМ — настройки   СКМ — бинд   Right Shift — закрыть"), width / 2, height - 12, 0x9A9AB0);
 
         // всплывающее описание на русском
         if (hovered != null && binding == null && dragging == null) {
@@ -139,6 +144,9 @@ public class ClickGui extends Screen {
         binding = null;
         for (Region r : regions) {
             if (!r.has(mx, my)) continue;
+            if ("\u0000header".equals(r.friend()) && GuiMove.enabled() && button == 0) {
+                movingGui = true; moveFromX = mx; moveFromY = my; return true;
+            }
             if (r.setting() != null) {
                 if (button == 0) { dragging = r; slide(r, mx); }
             } else if (r.friend() != null) {
@@ -157,13 +165,14 @@ public class ClickGui extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (movingGui) { offsetX += (int) dx; offsetY += (int) dy; return true; }
         if (dragging != null) { slide(dragging, mx); return true; }
         return super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
-        dragging = null;
+        dragging = null; movingGui = false;
         return super.mouseReleased(mx, my, button);
     }
 

@@ -11,7 +11,8 @@ public class ModuleManager {
             new Sprint(), new Fly(), new Speed(), new Step(), new Jesus(), new ElytraFly(),
             new Phase(), new ClickTP(), new NoFall(),
             new Fullbright(), new ESP(), new TargetESP(),
-            new FakeLag(), new Boost(), new NoSlow());
+            new FakeLag(), new Boost(), new NoSlow(), new NoWeb(),
+            new NoServerRotate(), new NoServerSlot(), new GuiMove());
 
     public List<Module> getAll() { return modules; }
 
