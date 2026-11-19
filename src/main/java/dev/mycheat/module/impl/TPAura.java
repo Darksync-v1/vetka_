@@ -93,7 +93,7 @@ public class TPAura extends Module {
         active = true;
         try {
             if (rotate.getInt() == 1) {
-                Vec3d aim = target.getBoundingBox().getCenter().subtract(destination.add(0, player.getEyeHeight(), 0));
+                Vec3d aim = target.getBoundingBox().getCenter().subtract(destination.add(0, player.getEyeHeight(player.getPose()), 0));
                 float yaw = (float) (Math.toDegrees(Math.atan2(aim.z, aim.x)) - 90.0);
                 float pitch = (float) -Math.toDegrees(Math.atan2(aim.y, Math.hypot(aim.x, aim.z)));
                 player.networkHandler.sendPacket(new net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket.LookAndOnGround(
