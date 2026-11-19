@@ -14,6 +14,8 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.EnumMap;
+import java.util.Map;
 
 /** ThunderHack-inspired compact ClickGUI for Vetka v1. */
 public class ClickGui extends Screen {
@@ -25,6 +27,7 @@ public class ClickGui extends Screen {
     }
 
     private final List<Region> regions = new ArrayList<>();
+    private final Map<Category, Integer> scrollOffsets = new EnumMap<>(Category.class);
     private Module expanded, binding;
     private Region dragging;
     private TextSetting editingText;
@@ -44,6 +47,9 @@ public class ClickGui extends Screen {
     }
     private void panel(DrawContext ctx, int x, int y, Category category, int mx, int my, float delta) {
         int bottom = y + PANEL_H;
+        int contentTop = y + HEADER_H + 5;
+        int contentBottom = bottom - 5;
+        int viewHeight = contentBottom - contentTop;
         ctx.fill(x, y, x + PANEL_W, bottom, 0xF0101119);
         ctx.fill(x, y, x + PANEL_W, y + HEADER_H, 0xFF191B27);
         ctx.fill(x, y, x + PANEL_W, y + 2, ACCENT);
@@ -53,42 +59,72 @@ public class ClickGui extends Screen {
         String total = String.valueOf(count);
         ctx.drawTextWithShadow(textRenderer, total, x + PANEL_W - 10 - textRenderer.getWidth(total), y + 9, 0xFF77798C);
 
-        int cy = y + HEADER_H + 5;
+        // Calculate the full content height so the wheel can reach every module and setting.
+        int contentHeight = 0;
         for (Module m : MyCheat.MODULES.getAll()) {
             if (m.getCategory() != category) continue;
-            if (cy + ROW_H > bottom - 5) break;
-            boolean hov = mx >= x + 5 && mx < x + PANEL_W - 5 && my >= cy && my < cy + ROW_H;
-            ctx.fill(x + 5, cy, x + PANEL_W - 5, cy + ROW_H, hov ? 0xFF292B3A : 0xFF1D1F2A);
-            ctx.fill(x + 5, cy + 3, x + 7, cy + ROW_H - 3, m.isEnabled() ? ACCENT : 0xFF444653);
-            ctx.drawTextWithShadow(textRenderer, m.getName(), x + 13, cy + 6, m.isEnabled() ? 0xFFF4F0FF : 0xFFB1B2BE);
-            String right = binding == m ? "[...]" : (m.getKey() >= 0 ? "[" + keyName(m.getKey()) + "]" : "");
-            if (!m.getSettings().isEmpty() || !m.getTextSettings().isEmpty()) right += expanded == m ? "  v" : "  >";
-            ctx.drawTextWithShadow(textRenderer, right, x + PANEL_W - 10 - textRenderer.getWidth(right), cy + 6, 0xFF85879A);
-            regions.add(new Region(x + 5, cy, x + PANEL_W - 5, cy + ROW_H, m, null, null));
+            contentHeight += ROW_H + 2;
+            if (expanded == m) contentHeight += m.getSettings().size() * (SETTING_H + 1)
+                    + m.getTextSettings().size() * (SETTING_H + 1);
+        }
+        int maxScroll = Math.max(0, contentHeight - viewHeight);
+        int scroll = Math.max(0, Math.min(maxScroll, scrollOffsets.getOrDefault(category, 0)));
+        scrollOffsets.put(category, scroll);
+
+        ctx.enableScissor(x + 2, contentTop, x + PANEL_W - 2, contentBottom);
+        int cy = contentTop - scroll;
+        for (Module m : MyCheat.MODULES.getAll()) {
+            if (m.getCategory() != category) continue;
+            int rowTop = cy;
+            int rowBottom = cy + ROW_H;
+            if (rowBottom > contentTop && rowTop < contentBottom) {
+                boolean hov = mx >= x + 5 && mx < x + PANEL_W - 5 && my >= Math.max(rowTop, contentTop) && my < Math.min(rowBottom, contentBottom);
+                ctx.fill(x + 5, rowTop, x + PANEL_W - 5, rowBottom, hov ? 0xFF292B3A : 0xFF1D1F2A);
+                ctx.fill(x + 5, rowTop + 3, x + 7, rowBottom - 3, m.isEnabled() ? ACCENT : 0xFF444653);
+                ctx.drawTextWithShadow(textRenderer, m.getName(), x + 13, rowTop + 6, m.isEnabled() ? 0xFFF4F0FF : 0xFFB1B2BE);
+                String right = binding == m ? "[...]" : (m.getKey() >= 0 ? "[" + keyName(m.getKey()) + "]" : "");
+                if (!m.getSettings().isEmpty() || !m.getTextSettings().isEmpty()) right += expanded == m ? "  v" : "  >";
+                ctx.drawTextWithShadow(textRenderer, right, x + PANEL_W - 10 - textRenderer.getWidth(right), rowTop + 6, 0xFF85879A);
+                regions.add(new Region(x + 5, Math.max(rowTop, contentTop), x + PANEL_W - 5, Math.min(rowBottom, contentBottom), m, null, null));
+            }
             cy += ROW_H + 2;
 
             if (expanded == m) {
-                for (NumberSetting s : m.getSettings()) {
-                    if (cy + SETTING_H > bottom - 3) break;
-                    ctx.fill(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, 0xFF14151D);
-                    int barW = (int)((PANEL_W - 18) * s.normalized());
-                    ctx.fill(x + 9, cy + SETTING_H - 2, x + 9 + barW, cy + SETTING_H, ACCENT);
-                    String label = s.name + "  " + fmt(s);
-                    ctx.drawTextWithShadow(textRenderer, label, x + 13, cy + 4, 0xFFD0CDDA);
-                    regions.add(new Region(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, null, s, null));
+                for (NumberSetting setting : m.getSettings()) {
+                    int st = cy, sb = cy + SETTING_H;
+                    if (sb > contentTop && st < contentBottom) {
+                        ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xFF14151D);
+                        int barW = (int)((PANEL_W - 18) * setting.normalized());
+                        ctx.fill(x + 9, sb - 2, x + 9 + barW, sb, ACCENT);
+                        String label = setting.name + "  " + fmt(setting);
+                        ctx.drawTextWithShadow(textRenderer, label, x + 13, st + 4, 0xFFD0CDDA);
+                        regions.add(new Region(x + 9, Math.max(st, contentTop), x + PANEL_W - 9, Math.min(sb, contentBottom), null, setting, null));
+                    }
                     cy += SETTING_H + 1;
                 }
-                for (TextSetting s : m.getTextSettings()) {
-                    if (cy + SETTING_H > bottom - 3) break;
-                    ctx.fill(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, 0xFF14151D);
-                    String shown = s.name + ": " + s.get();
-                    if (shown.length() > 24) shown = shown.substring(0, 21) + "...";
-                    if (editingText == s && textField != null) textField.render(ctx, mx, my, delta);
-                    else ctx.drawTextWithShadow(textRenderer, shown, x + 13, cy + 4, 0xFFD0CDDA);
-                    regions.add(new Region(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, null, null, s));
+                for (TextSetting setting : m.getTextSettings()) {
+                    int st = cy, sb = cy + SETTING_H;
+                    if (sb > contentTop && st < contentBottom) {
+                        ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xFF14151D);
+                        String shown = setting.name + ": " + setting.get();
+                        if (shown.length() > 24) shown = shown.substring(0, 21) + "...";
+                        if (editingText == setting && textField != null) textField.render(ctx, mx, my, delta);
+                        else ctx.drawTextWithShadow(textRenderer, shown, x + 13, st + 4, 0xFFD0CDDA);
+                        regions.add(new Region(x + 9, Math.max(st, contentTop), x + PANEL_W - 9, Math.min(sb, contentBottom), null, null, setting));
+                    }
                     cy += SETTING_H + 1;
                 }
             }
+        }
+        ctx.disableScissor();
+        if (maxScroll > 0) {
+            int trackX = x + PANEL_W - 3;
+            int trackTop = contentTop + 1;
+            int trackBottom = contentBottom - 1;
+            int thumbH = Math.max(14, viewHeight * viewHeight / contentHeight);
+            int thumbY = trackTop + (trackBottom - trackTop - thumbH) * scroll / maxScroll;
+            ctx.fill(trackX, trackTop, trackX + 2, trackBottom, 0xFF343644);
+            ctx.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, ACCENT);
         }
     }
 
@@ -111,6 +147,25 @@ public class ClickGui extends Screen {
         }
         ctx.drawCenteredTextWithShadow(textRenderer, "ЛКМ — toggle     ПКМ — settings     СКМ — bind", width / 2, height - 12, 0xFF898B9B);
         super.render(ctx, mx, my, delta);
+    }
+
+    @Override public boolean mouseScrolled(double mx, double my, double horizontalAmount, double verticalAmount) {
+        int gridW = PANEL_W * 2 + GAP;
+        int gridH = PANEL_H * 2 + GAP;
+        int left = (width - gridW) / 2;
+        int top = Math.max(30, (height - gridH) / 2 + 8);
+        Category[] categories = Category.values();
+        for (int i = 0; i < categories.length; i++) {
+            int x = left + (i % 2) * (PANEL_W + GAP);
+            int y = top + (i / 2) * (PANEL_H + GAP);
+            if (mx >= x && mx < x + PANEL_W && my >= y + HEADER_H && my < y + PANEL_H) {
+                Category category = categories[i];
+                int current = scrollOffsets.getOrDefault(category, 0);
+                scrollOffsets.put(category, Math.max(0, current - (int)Math.round(verticalAmount * 24)));
+                return true;
+            }
+        }
+        return super.mouseScrolled(mx, my, horizontalAmount, verticalAmount);
     }
 
     private void slide(Region r, double mx) {
