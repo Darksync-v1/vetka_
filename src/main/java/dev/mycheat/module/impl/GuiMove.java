@@ -27,7 +27,7 @@ public class GuiMove extends Module {
         boolean a = InputUtil.isKeyPressed(win, GLFW.GLFW_KEY_A);
         boolean s = InputUtil.isKeyPressed(win, GLFW.GLFW_KEY_S);
         boolean d = InputUtil.isKeyPressed(win, GLFW.GLFW_KEY_D);
-        double f = (w ? 1 : 0) - (s ? 1 : 0), side = (d ? 1 : 0) - (a ? 1 : 0);
+        double f = (w ? 1 : 0) - (s ? 1 : 0), side = (a ? 1 : 0) - (d ? 1 : 0);
         if (f == 0 && side == 0) return;
         double yaw = Math.toRadians(p.getYaw());
         double sin = Math.sin(yaw), cos = Math.cos(yaw);

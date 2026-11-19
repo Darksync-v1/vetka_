@@ -12,12 +12,23 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
-/** Рисует бегающее по цели кольцо (цель берётся из KillAura / ElytraAura). */
+/** Рисует кольцо и 4 ярких шарика, вращающихся вокруг текущей цели ауры (KillAura / ElytraAura). */
 public class TargetESP extends Module {
     private final NumberSetting size = add(new NumberSetting("Size", 0.8, 0.3, 2.0, 0.1));
     private final NumberSetting speed = add(new NumberSetting("Speed", 1.0, 0.2, 3.0, 0.1));
+    private final NumberSetting orbSize = add(new NumberSetting("OrbSize", 0.12, 0.05, 0.3, 0.01));
 
-    public TargetESP() { super("TargetESP", Category.RENDER, "Рисует кольцо, бегающее вверх и вниз по текущей цели ауры."); }
+    public TargetESP() { super("TargetESP", Category.RENDER, "Рисует кольцо и 4 ярких шарика вокруг текущей цели ауры — хорошо видно даже издалека."); }
+
+    private static void quad(Matrix4f m, float x, float y, float z, float r, int cr, int cg, int cb, int ca) {
+        BufferBuilder buf = Tessellator.getInstance().begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+        int n = 10;
+        for (int i = 0; i <= n; i++) {
+            double a = i * (Math.PI * 2 / n);
+            buf.vertex(m, x + (float) (Math.cos(a) * r), (float) (y + Math.sin(a) * r), z).color(cr, cg, cb, ca);
+        }
+        BufferRenderer.drawWithGlobalProgram(buf.end());
+    }
 
     public void render(WorldRenderContext ctx) {
         Entity t = Targets.get();
@@ -39,18 +50,28 @@ public class TargetESP extends Module {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
-        RenderSystem.lineWidth(3.0f);
 
-        BufferBuilder buf = Tessellator.getInstance().begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
+        // кольцо
+        RenderSystem.lineWidth(3.0f);
+        BufferBuilder ring = Tessellator.getInstance().begin(VertexFormat.DrawMode.DEBUG_LINE_STRIP, VertexFormats.POSITION_COLOR);
         int n = 36;
         for (int i = 0; i <= n; i++) {
             double a = i * (Math.PI * 2 / n);
-            buf.vertex(m, (float) (x + Math.cos(a) * r), (float) yy, (float) (z + Math.sin(a) * r))
-                    .color(255, 60, 60, 255);
+            ring.vertex(m, (float) (x + Math.cos(a) * r), (float) yy, (float) (z + Math.sin(a) * r)).color(255, 60, 60, 255);
         }
-        BufferRenderer.drawWithGlobalProgram(buf.end());
-
+        BufferRenderer.drawWithGlobalProgram(ring.end());
         RenderSystem.lineWidth(1.0f);
+
+        // 4 ярких шарика по кругу, со сдвигом по высоте, чтобы были видны лучше
+        double or = orbSize.get();
+        for (int i = 0; i < 4; i++) {
+            double a = time * 1.5 + i * (Math.PI / 2);
+            float ox = (float) (x + Math.cos(a) * r);
+            float oz = (float) (z + Math.sin(a) * r);
+            float oy = (float) (yy + Math.sin(time * 3 + i) * 0.15);
+            quad(m, ox, oy, oz, (float) or, 255, 70 + i * 40, 70, 255);
+        }
+
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
     }

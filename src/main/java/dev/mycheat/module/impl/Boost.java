@@ -5,9 +5,14 @@ import dev.mycheat.module.Module;
 import net.minecraft.client.option.CloudRenderMode;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.client.option.ParticlesMode;
+import dev.mycheat.setting.NumberSetting;
 
 /** Снижает нагрузку на рендер: частицы, облака, тени сущностей, смешивание биомов, графика Fast. */
 public class Boost extends Module {
+    private final NumberSetting vsync = add(new NumberSetting("VSync off", 1, 0, 1, 1));
+    private final NumberSetting mipmap = add(new NumberSetting("Mipmap off", 1, 0, 1, 1));
+    private boolean oldVsync;
+    private int oldMipmap;
     private ParticlesMode oldParticles;
     private CloudRenderMode oldClouds;
     private boolean oldShadows;
@@ -25,7 +30,11 @@ public class Boost extends Module {
         oldShadows = o.getEntityShadows().getValue();
         oldBlend = o.getBiomeBlendRadius().getValue();
         oldGraphics = o.getGraphicsMode().getValue();
+        oldVsync = o.getEnableVsync().getValue();
+        oldMipmap = o.getMipmapLevels().getValue();
 
+        if (vsync.getInt() == 1) o.getEnableVsync().setValue(false);
+        if (mipmap.getInt() == 1) o.getMipmapLevels().setValue(0);
         o.getParticles().setValue(ParticlesMode.MINIMAL);
         o.getCloudRenderMode().setValue(CloudRenderMode.OFF);
         o.getEntityShadows().setValue(false);
@@ -41,5 +50,7 @@ public class Boost extends Module {
         o.getEntityShadows().setValue(oldShadows);
         o.getBiomeBlendRadius().setValue(oldBlend);
         o.getGraphicsMode().setValue(oldGraphics);
+        o.getEnableVsync().setValue(oldVsync);
+        o.getMipmapLevels().setValue(oldMipmap);
     }
 }
