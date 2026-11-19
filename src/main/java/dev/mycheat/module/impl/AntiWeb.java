@@ -4,16 +4,15 @@ import dev.mycheat.MyCheat;
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 
-/**
- * Делает паутину полностью твёрдой: зайти внутрь неё нельзя, как будто это обычный блок.
- * Это противоположность NoWeb (который даёт ходить сквозь паутину без замедления) — используй
- * то, что нужно именно тебе. Коллизия меняется в CobwebMixin.
- */
+/** While enabled, cobwebs have a full-block collision shape and cannot be entered. */
 public class AntiWeb extends Module {
-    public AntiWeb() { super("AntiWeb", Category.MOVEMENT, "Паутина становится полностью твёрдой — зайти в неё нельзя, как в обычный блок."); }
+    public AntiWeb() {
+        super("AntiWeb", Category.MOVEMENT,
+                "Делает паутину твёрдым блоком: при включении в неё нельзя войти.");
+    }
 
     public static boolean solid() {
-        AntiWeb m = MyCheat.MODULES.get(AntiWeb.class);
-        return m != null && m.isEnabled();
+        AntiWeb module = MyCheat.MODULES.get(AntiWeb.class);
+        return module != null && module.isEnabled();
     }
 }

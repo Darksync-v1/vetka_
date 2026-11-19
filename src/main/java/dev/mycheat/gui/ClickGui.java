@@ -4,35 +4,33 @@ import dev.mycheat.MyCheat;
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
+import dev.mycheat.setting.TextSetting;
 import dev.mycheat.util.Config;
-import dev.mycheat.util.Friends;
-import dev.mycheat.util.RenderUtil;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Меню по колонкам-категориям.
- * ЛКМ по модулю: вкл/выкл. ПКМ: настройки. СКМ: назначить клавишу (Delete — снять, Esc — отмена).
- * Список друзей справа, клик по нику убирает друга.
- */
+/** ThunderHack-inspired compact ClickGUI for Vetka v1. */
 public class ClickGui extends Screen {
-    private static final int W = 124, HEAD = 18, ROW = 16, SROW = 14, GAP = 8;
-
-    private record Region(int x1, int y1, int x2, int y2, Module module, NumberSetting setting, String friend) {
+    private static final int PANEL_W = 178, PANEL_H = 196, GAP = 9;
+    private static final int HEADER_H = 25, ROW_H = 19, SETTING_H = 17;
+    private static final int ACCENT = 0xFF9B68E8;
+    private record Region(int x1, int y1, int x2, int y2, Module module, NumberSetting setting, TextSetting textSetting) {
         boolean has(double mx, double my) { return mx >= x1 && mx < x2 && my >= y1 && my < y2; }
     }
 
     private final List<Region> regions = new ArrayList<>();
     private Module expanded, binding;
     private Region dragging;
+    private TextSetting editingText;
+    private TextFieldWidget textField;
 
-    public ClickGui() { super(Text.literal("Vetka v1")); }
-
+    public ClickGui() { super(Text.literal("Vetka | ClickGUI")); }
     @Override public boolean shouldPause() { return false; }
     @Override public void removed() { Config.save(); }
 
@@ -40,76 +38,79 @@ public class ClickGui extends Screen {
         String s = InputUtil.Type.KEYSYM.createFromCode(key).getLocalizedText().getString();
         return s.length() > 8 ? s.substring(0, 8) : s;
     }
-
     private static String fmt(NumberSetting s) {
         double v = s.get();
         return v == Math.rint(v) ? String.valueOf((long) v) : String.format("%.2f", v);
     }
+    private void panel(DrawContext ctx, int x, int y, Category category, int mx, int my, float delta) {
+        int bottom = y + PANEL_H;
+        ctx.fill(x, y, x + PANEL_W, bottom, 0xF0101119);
+        ctx.fill(x, y, x + PANEL_W, y + HEADER_H, 0xFF191B27);
+        ctx.fill(x, y, x + PANEL_W, y + 2, ACCENT);
+        ctx.drawTextWithShadow(textRenderer, category.title.toUpperCase(), x + 10, y + 9, 0xFFF0ECF8);
+        int count = 0;
+        for (Module m : MyCheat.MODULES.getAll()) if (m.getCategory() == category) count++;
+        String total = String.valueOf(count);
+        ctx.drawTextWithShadow(textRenderer, total, x + PANEL_W - 10 - textRenderer.getWidth(total), y + 9, 0xFF77798C);
 
-    @Override
-    public void render(DrawContext ctx, int mx, int my, float delta) {
-        regions.clear();
-        int accent = RenderUtil.rainbow(System.currentTimeMillis() / 1000.0, 0);
-        ctx.fill(0, 0, width, height, 0x90000000);
-        ctx.drawCenteredTextWithShadow(textRenderer, "Vetka v1", width / 2, 6, accent);
+        int cy = y + HEADER_H + 5;
+        for (Module m : MyCheat.MODULES.getAll()) {
+            if (m.getCategory() != category) continue;
+            if (cy + ROW_H > bottom - 5) break;
+            boolean hov = mx >= x + 5 && mx < x + PANEL_W - 5 && my >= cy && my < cy + ROW_H;
+            ctx.fill(x + 5, cy, x + PANEL_W - 5, cy + ROW_H, hov ? 0xFF292B3A : 0xFF1D1F2A);
+            ctx.fill(x + 5, cy + 3, x + 7, cy + ROW_H - 3, m.isEnabled() ? ACCENT : 0xFF444653);
+            ctx.drawTextWithShadow(textRenderer, m.getName(), x + 13, cy + 6, m.isEnabled() ? 0xFFF4F0FF : 0xFFB1B2BE);
+            String right = binding == m ? "[...]" : (m.getKey() >= 0 ? "[" + keyName(m.getKey()) + "]" : "");
+            if (!m.getSettings().isEmpty() || !m.getTextSettings().isEmpty()) right += expanded == m ? "  v" : "  >";
+            ctx.drawTextWithShadow(textRenderer, right, x + PANEL_W - 10 - textRenderer.getWidth(right), cy + 6, 0xFF85879A);
+            regions.add(new Region(x + 5, cy, x + PANEL_W - 5, cy + ROW_H, m, null, null));
+            cy += ROW_H + 2;
 
-        Category[] cats = Category.values();
-        int panels = cats.length + 1;
-        int startX = (width - (panels * W + (panels - 1) * GAP)) / 2;
-        int top = 22;
-
-        for (int i = 0; i < cats.length; i++) {
-            int x = startX + i * (W + GAP), y = top;
-            ctx.fill(x, y, x + W, y + HEAD, 0xF0221833);
-            ctx.drawCenteredTextWithShadow(textRenderer, cats[i].title, x + W / 2, y + 5, accent);
-            y += HEAD;
-            for (Module m : MyCheat.MODULES.getAll()) {
-                if (m.getCategory() != cats[i]) continue;
-                boolean hov = mx >= x && mx < x + W && my >= y && my < y + ROW;
-                int bg = m.isEnabled() ? (hov ? 0xD07A4BC0 : 0xC0603A99) : (hov ? 0xC02A2A3C : 0xC0141420);
-                ctx.fill(x, y, x + W, y + ROW, bg);
-                ctx.drawTextWithShadow(textRenderer, m.getName(), x + 6, y + 4, m.isEnabled() ? 0xFFFFFF : 0xAAAAAA);
-
-                String right = binding == m ? "[...]" : (m.getKey() >= 0 ? "[" + keyName(m.getKey()) + "]" : "");
-                if (!m.getSettings().isEmpty()) right += expanded == m ? " -" : " +";
-                ctx.drawTextWithShadow(textRenderer, right, x + W - 5 - textRenderer.getWidth(right), y + 4, 0x9A9AB0);
-                regions.add(new Region(x, y, x + W, y + ROW, m, null, null));
-                y += ROW;
-
-                if (expanded == m) {
-                    for (NumberSetting s : m.getSettings()) {
-                        ctx.fill(x, y, x + W, y + SROW, 0xB00C0C14);
-                        ctx.fill(x, y, x + (int) (W * s.normalized()), y + SROW, 0x908A52D6);
-                        ctx.drawTextWithShadow(textRenderer, s.name + ": " + fmt(s), x + 6, y + 3, 0xFFFFFF);
-                        regions.add(new Region(x, y, x + W, y + SROW, null, s, null));
-                        y += SROW;
-                    }
+            if (expanded == m) {
+                for (NumberSetting s : m.getSettings()) {
+                    if (cy + SETTING_H > bottom - 3) break;
+                    ctx.fill(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, 0xFF14151D);
+                    int barW = (int)((PANEL_W - 18) * s.normalized());
+                    ctx.fill(x + 9, cy + SETTING_H - 2, x + 9 + barW, cy + SETTING_H, ACCENT);
+                    String label = s.name + "  " + fmt(s);
+                    ctx.drawTextWithShadow(textRenderer, label, x + 13, cy + 4, 0xFFD0CDDA);
+                    regions.add(new Region(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, null, s, null));
+                    cy += SETTING_H + 1;
+                }
+                for (TextSetting s : m.getTextSettings()) {
+                    if (cy + SETTING_H > bottom - 3) break;
+                    ctx.fill(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, 0xFF14151D);
+                    String shown = s.name + ": " + s.get();
+                    if (shown.length() > 24) shown = shown.substring(0, 21) + "...";
+                    if (editingText == s && textField != null) textField.render(ctx, mx, my, delta);
+                    else ctx.drawTextWithShadow(textRenderer, shown, x + 13, cy + 4, 0xFFD0CDDA);
+                    regions.add(new Region(x + 9, cy, x + PANEL_W - 9, cy + SETTING_H, null, null, s));
+                    cy += SETTING_H + 1;
                 }
             }
         }
+    }
 
-        // друзья
-        int fx = startX + cats.length * (W + GAP), fy = top;
-        ctx.fill(fx, fy, fx + W, fy + HEAD, 0xF0221833);
-        ctx.drawCenteredTextWithShadow(textRenderer, "Friends", fx + W / 2, fy + 5, accent);
-        fy += HEAD;
-        List<String> friends = Friends.all();
-        if (friends.isEmpty()) {
-            ctx.fill(fx, fy, fx + W, fy + 28, 0xC0141420);
-            ctx.drawTextWithShadow(textRenderer, "СКМ по игроку", fx + 6, fy + 4, 0x9A9AB0);
-            ctx.drawTextWithShadow(textRenderer, "в мире — добавить", fx + 6, fy + 15, 0x9A9AB0);
+    @Override public void render(DrawContext ctx, int mx, int my, float delta) {
+        regions.clear();
+        ctx.fill(0, 0, width, height, 0xA9080910);
+        int gridW = PANEL_W * 2 + GAP;
+        int gridH = PANEL_H * 2 + GAP;
+        int left = (width - gridW) / 2;
+        int top = Math.max(30, (height - gridH) / 2 + 8);
+        ctx.fill(left - 8, top - 30, left + gridW + 8, top + gridH + 8, 0xE90D0E15);
+        ctx.fill(left - 8, top - 30, left + gridW + 8, top - 28, ACCENT);
+        ctx.drawTextWithShadow(textRenderer, "VETKA", left, top - 20, 0xFFF4F0FF);
+        ctx.drawTextWithShadow(textRenderer, "1.21.1  •  RIGHT SHIFT", left + gridW - textRenderer.getWidth("1.21.1  •  RIGHT SHIFT"), top - 20, 0xFF85879A);
+        Category[] c = Category.values();
+        for (int i = 0; i < c.length; i++) {
+            int x = left + (i % 2) * (PANEL_W + GAP);
+            int y = top + (i / 2) * (PANEL_H + GAP);
+            panel(ctx, x, y, c[i], mx, my, delta);
         }
-        for (String n : friends) {
-            boolean hov = mx >= fx && mx < fx + W && my >= fy && my < fy + ROW;
-            ctx.fill(fx, fy, fx + W, fy + ROW, hov ? 0xC03A1F2A : 0xC0141420);
-            ctx.drawTextWithShadow(textRenderer, "§a" + n, fx + 6, fy + 4, 0xFFFFFF);
-            ctx.drawTextWithShadow(textRenderer, "✕", fx + W - 14, fy + 4, 0xFF6666);
-            regions.add(new Region(fx, fy, fx + W, fy + ROW, null, null, n));
-            fy += ROW;
-        }
-
-        ctx.drawCenteredTextWithShadow(textRenderer,
-                "ЛКМ — вкл/выкл   ПКМ — настройки   СКМ — бинд   Right Shift — закрыть", width / 2, height - 12, 0x9A9AB0);
+        ctx.drawCenteredTextWithShadow(textRenderer, "ЛКМ — toggle     ПКМ — settings     СКМ — bind", width / 2, height - 12, 0xFF898B9B);
+        super.render(ctx, mx, my, delta);
     }
 
     private void slide(Region r, double mx) {
@@ -117,17 +118,23 @@ public class ClickGui extends Screen {
         double t = Math.max(0, Math.min(1, (mx - r.x1()) / (r.x2() - r.x1())));
         s.set(s.min + t * (s.max - s.min));
     }
-
-    @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    @Override public boolean charTyped(char chr, int modifiers) {
+        if (textField != null && textField.charTyped(chr, modifiers)) return true;
+        return super.charTyped(chr, modifiers);
+    }
+    @Override public boolean mouseClicked(double mx, double my, int button) {
+        if (textField != null && textField.mouseClicked(mx, my, button)) return true;
+        if (editingText != null) { editingText = null; textField = null; Config.save(); }
         binding = null;
         for (Region r : regions) {
             if (!r.has(mx, my)) continue;
-            if (r.setting() != null) {
+            if (r.textSetting() != null) {
+                editingText = r.textSetting();
+                textField = new TextFieldWidget(textRenderer, r.x1() + 3, r.y1() + 1, r.x2() - r.x1() - 6, SETTING_H - 2, Text.literal(editingText.name));
+                textField.setMaxLength(128); textField.setText(editingText.get());
+                textField.setChangedListener(editingText::set); textField.setFocused(true); return true;
+            } else if (r.setting() != null) {
                 if (button == 0) { dragging = r; slide(r, mx); }
-            } else if (r.friend() != null) {
-                Friends.remove(r.friend());
-                Config.save();
             } else if (r.module() != null) {
                 Module m = r.module();
                 if (button == 0) m.toggle();
@@ -138,26 +145,24 @@ public class ClickGui extends Screen {
         }
         return super.mouseClicked(mx, my, button);
     }
-
-    @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+    @Override public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
         if (dragging != null) { slide(dragging, mx); return true; }
         return super.mouseDragged(mx, my, button, dx, dy);
     }
-
-    @Override
-    public boolean mouseReleased(double mx, double my, int button) {
-        dragging = null;
-        return super.mouseReleased(mx, my, button);
+    @Override public boolean mouseReleased(double mx, double my, int button) {
+        dragging = null; return super.mouseReleased(mx, my, button);
     }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    @Override public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (editingText != null && textField != null) {
+            if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER || keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                editingText = null; textField = null; Config.save(); return true;
+            }
+            if (textField.keyPressed(keyCode, scanCode, modifiers)) return true;
+        }
         if (binding != null) {
             if (keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_BACKSPACE) binding.setKey(-1);
             else if (keyCode != GLFW.GLFW_KEY_ESCAPE) binding.setKey(keyCode);
-            binding = null;
-            return true;
+            binding = null; return true;
         }
         if (keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) { close(); return true; }
         return super.keyPressed(keyCode, scanCode, modifiers);

@@ -3,6 +3,7 @@ package dev.mycheat.util;
 import dev.mycheat.MyCheat;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
+import dev.mycheat.setting.TextSetting;
 import net.fabricmc.loader.api.FabricLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,10 @@ public final class Config {
                     String v = p.getProperty("set." + m.getName() + "." + s.name);
                     if (v != null) s.set(Double.parseDouble(v));
                 }
+                for (TextSetting s : m.getTextSettings()) {
+                    String v = p.getProperty("text." + m.getName() + "." + s.name);
+                    if (v != null) s.set(v);
+                }
             } catch (NumberFormatException ignored) {}
         }
         for (String n : p.getProperty("friends", "").split(",")) if (!n.isBlank()) Friends.add(n.trim());
@@ -33,6 +38,7 @@ public final class Config {
         for (Module m : MyCheat.MODULES.getAll()) {
             p.setProperty("bind." + m.getName(), String.valueOf(m.getKey()));
             for (NumberSetting s : m.getSettings()) p.setProperty("set." + m.getName() + "." + s.name, String.valueOf(s.get()));
+            for (TextSetting s : m.getTextSettings()) p.setProperty("text." + m.getName() + "." + s.name, s.get());
         }
         p.setProperty("friends", String.join(",", Friends.all()));
         try (var out = Files.newOutputStream(file())) { p.store(out, "Vetka v1"); } catch (Exception ignored) {}

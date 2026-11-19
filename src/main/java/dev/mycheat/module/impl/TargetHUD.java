@@ -27,9 +27,15 @@ public final class TargetHUD extends Module {
             return;
         }
 
+        // Minecraft stores health in points (20 points = 10 hearts).
+        // TargetHUD displays hearts, excluding temporary absorption hearts.
         float maxHealth = Math.max(1.0f, target.getMaxHealth());
-        float health = MathHelper.clamp(target.getHealth() + target.getAbsorptionAmount(), 0.0f, maxHealth + target.getAbsorptionAmount());
+        float health = MathHelper.clamp(target.getHealth(), 0.0f, maxHealth);
         float ratio = MathHelper.clamp(health / maxHealth, 0.0f, 1.0f);
+        // Display health on a 10-heart scale (Minecraft's 20 health points = 10 hearts).
+        // Keep the HUD capped at 10 even for entities with boosted maximum health.
+        float shownHealth = MathHelper.clamp(health / 2.0f, 0.0f, 10.0f);
+        float shownMaxHealth = 10.0f;
         long now = System.currentTimeMillis();
         float delta = lastFrame == 0 ? 1.0f : MathHelper.clamp((now - lastFrame) / 150.0f, 0.0f, 1.0f);
         lastFrame = now;
@@ -39,7 +45,7 @@ public final class TargetHUD extends Module {
         String name = target instanceof PlayerEntity player
                 ? player.getGameProfile().getName()
                 : target.getName().getString();
-        String hpText = String.format(java.util.Locale.ROOT, "%.1f / %.1f HP", health, maxHealth);
+        String hpText = String.format(java.util.Locale.ROOT, "%.1f / %.1f HP", shownHealth, shownMaxHealth);
 
         int panelWidth = 156;
         int panelHeight = 42;

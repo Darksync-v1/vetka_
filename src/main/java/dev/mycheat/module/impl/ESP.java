@@ -11,37 +11,66 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-/** Подсвечивает игроков сквозь стены: контур (glow) и/или 3D-бокс. */
+/** Player ESP: draws camera-relative 3D boxes and optionally enables the vanilla outline. */
 public class ESP extends Module {
-    private final NumberSetting glow = add(new NumberSetting("Glow", 1, 0, 1, 1));
+    private final NumberSetting glow = add(new NumberSetting("Glow", 0, 0, 1, 1));
     private final NumberSetting box = add(new NumberSetting("Box", 1, 0, 1, 1));
 
     public ESP() {
-        super("ESP", Category.RENDER, "Подсвечивает игроков сквозь стены контуром и/или объёмным боксом. Друзья отмечаются зелёным, враги — красным.");
+        super("ESP", Category.RENDER,
+                "Показывает игроков 3D-боксами сквозь стены. Друзья отмечаются зелёным, остальные — красным.");
     }
 
-    @Override public void onTick() {
-        for (Entity e : mc().world.getEntities())
-            if (e instanceof PlayerEntity pl && pl != mc().player) pl.setGlowing(glow.getInt() == 1);
+    @Override
+    public void onTick() {
+        if (mc().world == null || mc().player == null) return;
+        // Vanilla glow is optional; the ESP box below does not depend on entity glowing metadata.
+        if (glow.getInt() == 1) {
+            for (Entity e : mc().world.getEntities()) {
+                if (e instanceof PlayerEntity pl && pl != mc().player) pl.setGlowing(true);
+            }
+        }
     }
-    @Override protected void onDisable() {
-        for (Entity e : mc().world.getEntities()) if (e instanceof PlayerEntity pl) pl.setGlowing(false);
+
+    @Override
+    protected void onDisable() {
+        if (mc().world == null) return;
+        for (Entity e : mc().world.getEntities()) {
+            if (e instanceof PlayerEntity pl && pl != mc().player) pl.setGlowing(false);
+        }
     }
 
     public void render(WorldRenderContext ctx) {
-        if (box.getInt() == 0 || ctx.matrixStack() == null) return;
-        float delta = ctx.tickCounter().getTickDelta(false);
-        Vec3d cam = ctx.camera().getPos();
-        for (Entity e : mc().world.getEntities()) {
-            if (!(e instanceof PlayerEntity pl) || pl == mc().player) continue;
-            double x = MathHelper.lerp(delta, e.prevX, e.getX()) - cam.x;
-            double y = MathHelper.lerp(delta, e.prevY, e.getY()) - cam.y;
-            double z = MathHelper.lerp(delta, e.prevZ, e.getZ()) - cam.z;
-            var local = e.getBoundingBox().offset(x - e.getX(), y - e.getY(), z - e.getZ());
-            boolean friend = Friends.isFriend(pl);
-            ctx.matrixStack().push();
-            RenderUtil.box(ctx.matrixStack(), local, friend ? 0.3f : 1.0f, friend ? 1.0f : 0.25f, 0.3f, 0.85f);
-            ctx.matrixStack().pop();
+        if (box.getInt() == 0 || ctx.matrixStack() == null || mc().world == null || mc().player == null) return;
+
+        float tickDelta = ctx.tickCounter().getTickDelta(false);
+        Vec3d camera = ctx.camera().getPos();
+        var matrices = ctx.matrixStack();
+        matrices.push();
+        // WorldRenderContext's matrix stack is in world space; translate once into camera space.
+        matrices.translate(-camera.x, -camera.y, -camera.z);
+
+        try {
+            for (Entity entity : mc().world.getEntities()) {
+                if (!(entity instanceof PlayerEntity player) || player == mc().player || !player.isAlive()) continue;
+
+                double ix = MathHelper.lerp(tickDelta, entity.prevX, entity.getX());
+                double iy = MathHelper.lerp(tickDelta, entity.prevY, entity.getY());
+                double iz = MathHelper.lerp(tickDelta, entity.prevZ, entity.getZ());
+                double dx = ix - entity.getX();
+                double dy = iy - entity.getY();
+                double dz = iz - entity.getZ();
+                var interpolatedBox = entity.getBoundingBox().offset(dx, dy, dz);
+
+                boolean friend = Friends.isFriend(player);
+                RenderUtil.box(matrices, interpolatedBox,
+                        friend ? 0.25f : 1.0f,
+                        friend ? 1.0f : 0.20f,
+                        friend ? 0.35f : 0.20f,
+                        0.95f);
+            }
+        } finally {
+            matrices.pop();
         }
     }
 }

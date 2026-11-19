@@ -11,9 +11,9 @@ public class ModuleManager {
             new Sprint(), new Fly(), new Speed(), new Step(), new Jesus(), new ElytraFly(),
             new Phase(), new ClickTP(), new NoFall(),
             new Fullbright(), new ESP(), new TargetESP(), new TargetHUD(), new Crosshair(), new Coordinates(), new FPS(), new ArmorStatus(), new ChinaHat(), new NameTags(),
-            new FakeLag(), new Boost(), new NoSlow(), new NoWeb(), new AutoEZ(),
+            new FakeLag(), new Boost(), new NoSlow(), new NoWeb(), new AutoEZ(), new MessageAppend(), new MessagePrefix(),
             new NoServerRotate(), new NoServerSlot(), new GuiMove(),
-            new AntiWeb(), new Reach(), new GroundBoost(), new TpsSync());
+            new AntiWeb(), new Reach(), new GroundBoost(), new TpsSync(), new Femboy());
 
     public List<Module> getAll() { return modules; }
 

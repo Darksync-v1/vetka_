@@ -1,6 +1,7 @@
 package dev.mycheat.module;
 
 import dev.mycheat.setting.NumberSetting;
+import dev.mycheat.setting.TextSetting;
 import net.minecraft.client.MinecraftClient;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ public abstract class Module {
     private int key = -1;
     public boolean keyDown;
     private final List<NumberSetting> settings = new ArrayList<>();
+    private final List<TextSetting> textSettings = new ArrayList<>();
 
     protected Module(String name, Category category, String description) {
         this.name = name; this.category = category; this.description = description;
@@ -21,6 +23,8 @@ public abstract class Module {
 
     protected NumberSetting add(NumberSetting s) { settings.add(s); return s; }
     public List<NumberSetting> getSettings() { return settings; }
+    protected TextSetting add(TextSetting s) { textSettings.add(s); return s; }
+    public List<TextSetting> getTextSettings() { return textSettings; }
 
     public String getName() { return name; }
     public Category getCategory() { return category; }
