@@ -33,6 +33,7 @@ public class Speed extends Module {
         double len = Math.hypot(x, z);
         if (len == 0) return;
         Vec3d v = p.getVelocity();
-        p.setVelocity(x / len * cur, v.y, z / len * cur);
+        double c = cur * TpsSync.scale();
+        p.setVelocity(x / len * c, v.y, z / len * c);
     }
 }

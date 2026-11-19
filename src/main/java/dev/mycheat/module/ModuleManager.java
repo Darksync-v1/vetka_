@@ -12,7 +12,8 @@ public class ModuleManager {
             new Phase(), new ClickTP(), new NoFall(),
             new Fullbright(), new ESP(), new TargetESP(),
             new FakeLag(), new Boost(), new NoSlow(), new NoWeb(),
-            new NoServerRotate(), new NoServerSlot(), new GuiMove());
+            new NoServerRotate(), new NoServerSlot(), new GuiMove(),
+            new AntiWeb(), new Reach(), new GroundBoost(), new TpsSync());
 
     public List<Module> getAll() { return modules; }
 

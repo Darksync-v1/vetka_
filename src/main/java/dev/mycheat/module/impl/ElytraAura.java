@@ -18,13 +18,13 @@ import net.minecraft.util.math.Vec3d;
  */
 public class ElytraAura extends Module {
     private final NumberSetting range = add(new NumberSetting("Range", 30, 5, 30, 1));
-    private final NumberSetting reach = add(new NumberSetting("Reach", 10.0, 2.0, 15.0, 0.5));
+    private final NumberSetting reach = add(new NumberSetting("Reach", 18.0, 2.0, 30.0, 0.5));
     private final NumberSetting chase = add(new NumberSetting("Chase", 0, 0, 1, 1));
     private final NumberSetting rotate = add(new NumberSetting("Rotate", 1, 0, 1, 1));
     private final NumberSetting speed = add(new NumberSetting("Speed", 1.6, 0.5, 4.0, 0.1));
 
     public ElytraAura() {
-        super("ElytraAura", Category.COMBAT, "В полёте на элитрах бьёт игрока в радиусе Reach (по умолчанию 10, не подлетая). Chase включает старый режим с подлётом, Rotate — автоповорот камеры на цель.");
+        super("ElytraAura", Category.COMBAT, "В полёте на элитрах бьёт игрока в радиусе Reach (по умолчанию 18, не подлетая, можно поднять до 30). Chase включает старый режим с подлётом, Rotate — автоповорот камеры на цель.");
     }
 
     @Override public void onTick() {
