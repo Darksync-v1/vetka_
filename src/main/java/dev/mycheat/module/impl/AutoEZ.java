@@ -27,7 +27,8 @@ public final class AutoEZ extends Module {
         if (entity.getId() != lastTargetId || now - lastAttackAt > 12_000L || now - lastMessageAt < 1_500L) return;
 
         String name = ((PlayerEntity) entity).getGameProfile().getName();
-        mc().player.sendChatMessage("я победил тебя ты всегда будешь слабее меня " + name);
+        if (mc().getNetworkHandler() == null) return;
+        mc().getNetworkHandler().sendChatMessage("я победил тебя ты всегда будешь слабее меня " + name);
         lastMessageAt = now;
         lastTargetId = -1;
     }
