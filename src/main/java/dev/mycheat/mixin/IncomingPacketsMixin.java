@@ -3,6 +3,8 @@ package dev.mycheat.mixin;
 import dev.mycheat.MyCheat;
 import dev.mycheat.module.impl.NoServerRotate;
 import dev.mycheat.module.impl.NoServerSlot;
+import dev.mycheat.module.impl.AutoEZ;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.LookAtS2CPacket;
 import net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket;
@@ -28,5 +30,14 @@ public class IncomingPacketsMixin {
     private void mycheat$noSlot(UpdateSelectedSlotS2CPacket packet, CallbackInfo ci) {
         NoServerSlot m = MyCheat.MODULES.get(NoServerSlot.class);
         if (m != null && m.isEnabled()) ci.cancel();
+    }
+
+    @Inject(method = "onEntityStatus", at = @At("TAIL"), require = 0)
+    private void mycheat$autoEz(EntityStatusS2CPacket packet, CallbackInfo ci) {
+        if (packet.getStatus() != 3) return;
+        if (net.minecraft.client.MinecraftClient.getInstance().world == null) return;
+        var entity = packet.getEntity(net.minecraft.client.MinecraftClient.getInstance().world);
+        AutoEZ autoEZ = MyCheat.MODULES.get(AutoEZ.class);
+        if (autoEZ != null) autoEZ.onEntityDeath(entity);
     }
 }

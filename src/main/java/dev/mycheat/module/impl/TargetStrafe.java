@@ -8,44 +8,62 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-/** Сам ходит кругами вокруг цели ауры, без необходимости держать W. */
+/** Кружение вокруг текущей цели Aura с настраиваемой скоростью, дистанцией и бустом при атаке. */
 public class TargetStrafe extends Module {
+    private final NumberSetting speed = add(new NumberSetting("Speed", 0.26, 0.05, 0.8, 0.01));
     private final NumberSetting radius = add(new NumberSetting("Radius", 2.6, 1.0, 6.0, 0.1));
-    private final NumberSetting speed = add(new NumberSetting("Speed", 0.26, 0.1, 0.5, 0.01));
-    private final NumberSetting jump = add(new NumberSetting("Jump", 0, 0, 1, 1));
-    private final NumberSetting reverse = add(new NumberSetting("Reverse", 0, 0, 1, 1));
-    private final NumberSetting smooth = add(new NumberSetting("Smooth", 0.35, 0.0, 0.9, 0.05));
-    private final NumberSetting closeSpeed = add(new NumberSetting("CloseSpeed", 0.6, 0.1, 1.5, 0.05));
-    private int dir = 1;
+    // 0 = выключен, 1 = включён. NumberSetting используется как переключатель в текущем ClickGUI.
+    private final NumberSetting hitBoost = add(new NumberSetting("HitBoost", 0, 0, 1, 1));
+    private int direction = 1;
 
     public TargetStrafe() {
         super("TargetStrafe", Category.COMBAT,
-                "Сам ходит кругами вокруг цели ауры (держать W не нужно). Radius — желаемая дистанция, " +
-                "Speed — скорость по кругу, CloseSpeed — как быстро подходит/отходит до нужной дистанции, " +
-                "Smooth — плавность поворота (0 = резко, выше = мягче), Reverse — сменить направление, " +
-                "Jump — прыгать на месте во время кружения.");
+                "Кружится вокруг выбранной цели Aura. Speed — скорость движения по кругу; " +
+                "Radius — желаемая дистанция до цели; HitBoost — дополнительный импульс при ударе.");
     }
 
-    @Override public void onTick() {
-        Entity t = Targets.get();
-        var p = mc().player;
-        if (t == null || p.isTouchingWater()) return;
-        if (p.horizontalCollision) dir = -dir;
-        int d = reverse.getInt() == 1 ? -dir : dir;
+    @Override
+    public void onTick() {
+        Entity target = Targets.get();
+        var player = mc().player;
+        if (target == null || player == null || player.isTouchingWater()) return;
+        if (player.horizontalCollision) direction = -direction;
 
-        double dx = p.getX() - t.getX(), dz = p.getZ() - t.getZ();
-        double dist = Math.hypot(dx, dz);
-        if (dist < 0.01) return;
-        double nx = dx / dist, nz = dz / dist;                       // от цели к игроку
-        double k = MathHelper.clamp((dist - radius.get()) * closeSpeed.get(), -1, 1); // >0: далеко, идём к цели
-        double mx = -nz * d - nx * k, mz = nx * d - nz * k;
-        double len = Math.hypot(mx, mz);
-        if (len == 0) return;
+        double dx = player.getX() - target.getX();
+        double dz = player.getZ() - target.getZ();
+        double distance = Math.hypot(dx, dz);
+        if (distance < 0.01) return;
 
-        double tx = mx / len * speed.get(), tz = mz / len * speed.get();
-        Vec3d v = p.getVelocity();
-        double s = smooth.get();
-        p.setVelocity(v.x * s + tx * (1 - s), v.y, v.z * s + tz * (1 - s));
-        if (jump.getInt() == 1 && p.isOnGround()) p.jump();
+        double nx = dx / distance;
+        double nz = dz / distance;
+        // Корректируем радиальную составляющую, чтобы удерживать заданный Radius.
+        double radial = MathHelper.clamp((distance - radius.get()) * 0.6, -0.6, 0.6);
+        double mx = -nz * direction - nx * radial;
+        double mz = nx * direction - nz * radial;
+        double length = Math.hypot(mx, mz);
+        if (length < 1.0E-6) return;
+
+        double vx = mx / length * speed.get();
+        double vz = mz / length * speed.get();
+        Vec3d velocity = player.getVelocity();
+        player.setVelocity(vx, velocity.y, vz);
+    }
+
+    /** Вызывается миксином при атаке; усиливает касательную скорость только по текущей цели. */
+    public void onTargetAttack(Entity target) {
+        if (!isEnabled() || hitBoost.getInt() != 1 || target == null || target != Targets.get()) return;
+        var player = mc().player;
+        if (player == null) return;
+
+        double dx = player.getX() - target.getX();
+        double dz = player.getZ() - target.getZ();
+        double distance = Math.hypot(dx, dz);
+        if (distance < 1.0E-4) return;
+
+        double tangentX = -dz / distance * direction;
+        double tangentZ = dx / distance * direction;
+        Vec3d velocity = player.getVelocity();
+        double impulse = Math.max(0.12, speed.get() * 0.75);
+        player.setVelocity(velocity.x + tangentX * impulse, velocity.y, velocity.z + tangentZ * impulse);
     }
 }

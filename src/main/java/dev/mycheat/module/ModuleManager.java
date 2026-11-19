@@ -10,8 +10,8 @@ public class ModuleManager {
             new TargetStrafe(), new AutoTotem(), new Velocity(),
             new Sprint(), new Fly(), new Speed(), new Step(), new Jesus(), new ElytraFly(),
             new Phase(), new ClickTP(), new NoFall(),
-            new Fullbright(), new ESP(), new TargetESP(),
-            new FakeLag(), new Boost(), new NoSlow(), new NoWeb(),
+            new Fullbright(), new ESP(), new TargetESP(), new TargetHUD(), new Crosshair(), new Coordinates(), new FPS(), new ArmorStatus(), new ChinaHat(), new NameTags(),
+            new FakeLag(), new Boost(), new NoSlow(), new NoWeb(), new AutoEZ(),
             new NoServerRotate(), new NoServerSlot(), new GuiMove(),
             new AntiWeb(), new Reach(), new GroundBoost(), new TpsSync());
 
