@@ -40,7 +40,7 @@ public abstract class TitleScreenMixin extends Screen {
         ci.cancel();
         // Replace the old black title-screen background with the client background image.
         context.drawTexture(Identifier.of("mycheat", "textures/gui/vetka_bg.png"),
-                0, 0, 0, 0, this.width, this.height, 1920, 1080);
+                0, 0, 0, 0, this.width, this.height, 3840, 2160);
         context.fill(0, 0, this.width, this.height, 0x55000000);
 
         float scale = 4f;

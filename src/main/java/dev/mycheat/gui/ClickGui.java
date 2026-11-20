@@ -11,7 +11,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,8 +130,6 @@ public class ClickGui extends Screen {
 
     @Override public void render(DrawContext ctx, int mx, int my, float delta) {
         regions.clear();
-        ctx.drawTexture(Identifier.of("mycheat", "textures/gui/vetka_bg.png"),
-                0, 0, 0, 0, width, height, 220, 391);
         ctx.fill(0, 0, width, height, 0x88080910);
         int gridW = PANEL_W * 2 + GAP;
         int gridH = PANEL_H * 2 + GAP;
