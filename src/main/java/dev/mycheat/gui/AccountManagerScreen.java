@@ -8,6 +8,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.session.Session;
 import dev.mycheat.mixin.MinecraftClientAccessor;
+import dev.mycheat.util.VetkaPaths;
 import net.minecraft.text.Text;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
