@@ -9,7 +9,7 @@ import dev.mycheat.util.Notifications;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.gui.DrawContext;
 import dev.mycheat.module.impl.TargetESP;
-import dev.mycheat.module.impl.ChinaHat;
+import dev.mycheat.module.impl.ChinaHat;\nimport dev.mycheat.module.impl.PhotoMath;
 import dev.mycheat.util.Config;
 import dev.mycheat.util.Friends;
 import net.fabricmc.api.ClientModInitializer;
@@ -43,6 +43,14 @@ public class MyCheat implements ClientModInitializer {
             if (hat != null && hat.isEnabled()) hat.render(ctx);
         });
         HudRenderCallback.EVENT.register((ctx, tickCounter) -> drawHud(ctx));
+        ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, params, receptionTimestamp) -> {
+            PhotoMath photoMath = MODULES.get(PhotoMath.class);
+            if (photoMath != null && photoMath.isEnabled()) photoMath.onIncomingMessage(message);
+        });
+        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+            PhotoMath photoMath = MODULES.get(PhotoMath.class);
+            if (photoMath != null && photoMath.isEnabled()) photoMath.onIncomingMessage(message);
+        });
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             while (guiKey.wasPressed()) mc.setScreen(new ClickGui());
             if (mc.player == null || mc.world == null) return;
