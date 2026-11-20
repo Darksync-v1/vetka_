@@ -1,0 +1,2 @@
+Vetka main menu background: src/main/resources/assets/mycheat/textures/gui/vetka_bg.png
+Resolution: 1920x1080 (16:9), converted from the image supplied by the user.

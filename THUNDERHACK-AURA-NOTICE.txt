@@ -1,0 +1,14 @@
+Aura porting note
+=================
+
+Vetka's Aura module has been adapted using the public ThunderHack Recode Aura
+implementation as a behavioral and settings reference:
+https://github.com/ulybaka1337/ThunderHack-Recode-Improved
+
+ThunderHack Recode is distributed under GNU GPL v3.0. The accompanying
+LICENSE-THUNDERHACK-GPL-3.0 file contains the license text. This Vetka port is
+not a verbatim copy of the original Aura: ThunderHack-specific managers,
+event bus, ray-tracing, inventory and rotation helpers were replaced with
+implementations compatible with Vetka's Fabric 1.21.1 module API. Features
+that require those unavailable managers are not represented as functional
+settings in this port.

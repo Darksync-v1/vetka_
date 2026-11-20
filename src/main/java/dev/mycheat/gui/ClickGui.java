@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ClickGui extends Screen {
         int contentTop = y + HEADER_H + 5;
         int contentBottom = bottom - 5;
         int viewHeight = contentBottom - contentTop;
-        ctx.fill(x, y, x + PANEL_W, bottom, 0xF0101119);
+        ctx.fill(x, y, x + PANEL_W, bottom, 0xD0101119);
         ctx.fill(x, y, x + PANEL_W, y + HEADER_H, 0xFF191B27);
         ctx.fill(x, y, x + PANEL_W, y + 2, ACCENT);
         ctx.drawTextWithShadow(textRenderer, category.title.toUpperCase(), x + 10, y + 9, 0xFFF0ECF8);
@@ -93,7 +94,7 @@ public class ClickGui extends Screen {
                 for (NumberSetting setting : m.getSettings()) {
                     int st = cy, sb = cy + SETTING_H;
                     if (sb > contentTop && st < contentBottom) {
-                        ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xFF14151D);
+                        ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xD014151D);
                         int barW = (int)((PANEL_W - 18) * setting.normalized());
                         ctx.fill(x + 9, sb - 2, x + 9 + barW, sb, ACCENT);
                         String label = setting.name + "  " + fmt(setting);
@@ -105,7 +106,7 @@ public class ClickGui extends Screen {
                 for (TextSetting setting : m.getTextSettings()) {
                     int st = cy, sb = cy + SETTING_H;
                     if (sb > contentTop && st < contentBottom) {
-                        ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xFF14151D);
+                        ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xD014151D);
                         String shown = setting.name + ": " + setting.get();
                         if (shown.length() > 24) shown = shown.substring(0, 21) + "...";
                         if (editingText == setting && textField != null) textField.render(ctx, mx, my, delta);
@@ -130,12 +131,14 @@ public class ClickGui extends Screen {
 
     @Override public void render(DrawContext ctx, int mx, int my, float delta) {
         regions.clear();
-        ctx.fill(0, 0, width, height, 0xA9080910);
+        ctx.drawTexture(Identifier.of("mycheat", "textures/gui/vetka_bg.png"),
+                0, 0, 0, 0, width, height, 220, 391);
+        ctx.fill(0, 0, width, height, 0x88080910);
         int gridW = PANEL_W * 2 + GAP;
         int gridH = PANEL_H * 2 + GAP;
         int left = (width - gridW) / 2;
         int top = Math.max(30, (height - gridH) / 2 + 8);
-        ctx.fill(left - 8, top - 30, left + gridW + 8, top + gridH + 8, 0xE90D0E15);
+        ctx.fill(left - 8, top - 30, left + gridW + 8, top + gridH + 8, 0xD90D0E15);
         ctx.fill(left - 8, top - 30, left + gridW + 8, top - 28, ACCENT);
         ctx.drawTextWithShadow(textRenderer, "VETKA", left, top - 20, 0xFFF4F0FF);
         ctx.drawTextWithShadow(textRenderer, "1.21.1  •  RIGHT SHIFT", left + gridW - textRenderer.getWidth("1.21.1  •  RIGHT SHIFT"), top - 20, 0xFF85879A);
@@ -215,8 +218,8 @@ public class ClickGui extends Screen {
             if (textField.keyPressed(keyCode, scanCode, modifiers)) return true;
         }
         if (binding != null) {
-            if (keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_BACKSPACE) binding.setKey(-1);
-            else if (keyCode != GLFW.GLFW_KEY_ESCAPE) binding.setKey(keyCode);
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE) binding.setKey(-1);
+            else binding.setKey(keyCode);
             binding = null; return true;
         }
         if (keyCode == GLFW.GLFW_KEY_RIGHT_SHIFT) { close(); return true; }

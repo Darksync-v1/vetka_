@@ -2,6 +2,17 @@
   "required": true,
   "package": "dev.mycheat.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["ClientPlayNetworkHandlerMixin", "ClientCommonNetworkHandlerMixin", "ClientPlayerInteractionManagerMixin", "ClientPlayerEntityMixin", "FluidBlockMixin", "TitleScreenMixin", "IncomingPacketsMixin", "CobwebMixin"],
-  "injectors": { "defaultRequire": 0 }
+  "client": [
+    "ClientPlayNetworkHandlerMixin",
+    "EntityRendererMixin",
+    "ClientPlayerInteractionManagerMixin",
+    "ClientPlayerEntityMixin",
+    "FluidBlockMixin",
+    "TitleScreenMixin",
+    "IncomingPacketsMixin",
+    "CobwebMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
 }

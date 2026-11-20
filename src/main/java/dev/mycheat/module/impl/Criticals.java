@@ -17,7 +17,7 @@ public class Criticals extends Module {
 
     public void onAttack() {
         var p = mc().player;
-        if (TPAura.active || p == null || !p.isOnGround() || p.isTouchingWater() || p.isInLava()
+        if (p == null || !p.isOnGround() || p.isTouchingWater() || p.isInLava()
                 || p.isClimbing() || p.hasVehicle() || p.getAbilities().flying) return;
         double x = p.getX(), y = p.getY(), z = p.getZ();
         p.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(x, y + bounce.get(), z, false));

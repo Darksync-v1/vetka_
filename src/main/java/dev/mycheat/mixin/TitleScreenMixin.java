@@ -5,27 +5,43 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import dev.mycheat.gui.AccountManagerScreen;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Единый чёрный фон на весь экран (без отдельного "пятна" под текстом), без логотипа Minecraft
- * и без жёлтого сплэш-текста — просто ничего из ванильного рендера не рисуем (cancel).
- * "Vetka Client" рисуется прямо на чёрном фоне без отдельной плашки. Все обычные кнопки
- * (Singleplayer, Multiplayer, Realms, Options и т.д.) остаются и работают как раньше.
- */
+/** Custom image background and Vetka title while keeping the vanilla title-screen buttons. */
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
     protected TitleScreenMixin(Text title) { super(title); }
 
+
+    @Inject(method = "init", at = @At("TAIL"), require = 0)
+    private void vetka$accountManagerButton(CallbackInfo ci) {
+        // Remove the Realms entry without changing the other vanilla buttons.
+        this.children().removeIf(element ->
+                element instanceof ButtonWidget button
+                        && button.getMessage().getString().toLowerCase(java.util.Locale.ROOT).contains("realms"));
+
+        TitleScreen self = (TitleScreen) (Object) this;
+        self.addDrawableChild(ButtonWidget.builder(Text.literal("Account Manager"),
+                button -> net.minecraft.client.MinecraftClient.getInstance()
+                        .setScreen(new AccountManagerScreen(self)))
+                .dimensions(this.width / 2 - 100, this.height - 48, 200, 20).build());
+    }
+
     @Inject(method = "render", at = @At("HEAD"), cancellable = true, require = 0)
     private void vetka$theme(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         ci.cancel();
-        context.fill(0, 0, this.width, this.height, 0xFF000000);
+        // Replace the old black title-screen background with the client background image.
+        context.drawTexture(Identifier.of("mycheat", "textures/gui/vetka_bg.png"),
+                0, 0, 0, 0, this.width, this.height, 1920, 1080);
+        context.fill(0, 0, this.width, this.height, 0x55000000);
 
         float scale = 4f;
         context.getMatrices().push();

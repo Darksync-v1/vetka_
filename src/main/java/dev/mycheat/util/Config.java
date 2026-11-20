@@ -31,6 +31,8 @@ public final class Config {
             } catch (NumberFormatException ignored) {}
         }
         for (String n : p.getProperty("friends", "").split(",")) if (!n.isBlank()) Friends.add(n.trim());
+        var hudNew = MyCheat.MODULES.get(dev.mycheat.module.impl.VetkaHudNew.class);
+        if (hudNew != null && Boolean.parseBoolean(p.getProperty("gui.vetkaHudNew", "false")) && !hudNew.isEnabled()) hudNew.toggle();
     }
 
     public static void save() {
@@ -41,6 +43,8 @@ public final class Config {
             for (TextSetting s : m.getTextSettings()) p.setProperty("text." + m.getName() + "." + s.name, s.get());
         }
         p.setProperty("friends", String.join(",", Friends.all()));
+        var hudNew = MyCheat.MODULES.get(dev.mycheat.module.impl.VetkaHudNew.class);
+        if (hudNew != null) p.setProperty("gui.vetkaHudNew", String.valueOf(hudNew.isEnabled()));
         try (var out = Files.newOutputStream(file())) { p.store(out, "Vetka v1"); } catch (Exception ignored) {}
     }
 }

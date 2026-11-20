@@ -1,6 +1,8 @@
 package dev.mycheat;
 
 import dev.mycheat.gui.ClickGui;
+import dev.mycheat.gui.VetkaHudNewGui;
+import dev.mycheat.module.impl.VetkaHudNew;
 import dev.mycheat.module.Module;
 import dev.mycheat.module.ModuleManager;
 import dev.mycheat.module.impl.ClickTP;
@@ -54,7 +56,7 @@ public class MyCheat implements ClientModInitializer {
             if (photoMath != null && photoMath.isEnabled()) photoMath.onIncomingMessage(message);
         });
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
-            while (guiKey.wasPressed()) mc.setScreen(new ClickGui());
+            while (guiKey.wasPressed()) { VetkaHudNew mode = MODULES.get(VetkaHudNew.class); mc.setScreen(mode != null && mode.isEnabled() ? new VetkaHudNewGui() : new ClickGui()); }
             if (mc.player == null || mc.world == null) return;
             if (mc.currentScreen == null) handleInput(mc);
             MODULES.tick(mc);
