@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity> {
     @Inject(method = "hasLabel", at = @At("RETURN"), cancellable = true, require = 0)
-    private void vetka$showPlayerNames(T entity, double squaredDistanceToCamera,
+    private void vetka$showPlayerNames(T entity,
                                        CallbackInfoReturnable<Boolean> cir) {
         NameTags tags = MyCheat.MODULES.get(NameTags.class);
         if (tags == null || !tags.isEnabled() || !(entity instanceof PlayerEntity)) return;
