@@ -32,10 +32,13 @@ public class MyCheat implements ClientModInitializer {
     public static final ModuleManager MODULES = new ModuleManager();
     private static KeyBinding guiKey;
     private static boolean middleDown;
+    private static long lastConfigSaveNanos;
+    private static final long CONFIG_AUTOSAVE_INTERVAL_NANOS = 10L * 60L * 1_000_000_000L;
 
     @Override
     public void onInitializeClient() {
         Config.load();
+        lastConfigSaveNanos = System.nanoTime();
         guiKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mycheat.gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "category.mycheat"));
         WorldRenderEvents.LAST.register(ctx -> {
@@ -56,6 +59,11 @@ public class MyCheat implements ClientModInitializer {
             if (photoMath != null && photoMath.isEnabled()) photoMath.onIncomingMessage(message);
         });
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            long now = System.nanoTime();
+            if (now - lastConfigSaveNanos >= CONFIG_AUTOSAVE_INTERVAL_NANOS) {
+                Config.save();
+                lastConfigSaveNanos = now;
+            }
             while (guiKey.wasPressed()) { VetkaHudNew mode = MODULES.get(VetkaHudNew.class); mc.setScreen(mode != null && mode.isEnabled() ? new VetkaHudNewGui() : new ClickGui()); }
             if (mc.player == null || mc.world == null) return;
             if (mc.currentScreen == null) handleInput(mc);

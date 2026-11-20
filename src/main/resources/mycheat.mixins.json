@@ -10,7 +10,8 @@
     "FluidBlockMixin",
     "TitleScreenMixin",
     "IncomingPacketsMixin",
-    "CobwebMixin"
+    "CobwebMixin",
+    "MinecraftClientAccessor"
   ],
   "injectors": {
     "defaultRequire": 0

@@ -29,7 +29,7 @@ public abstract class TitleScreenMixin extends Screen {
                         && button.getMessage().getString().toLowerCase(java.util.Locale.ROOT).contains("realms"));
 
         TitleScreen self = (TitleScreen) (Object) this;
-        self.addDrawableChild(ButtonWidget.builder(Text.literal("Account Manager"),
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("Account Manager"),
                 button -> net.minecraft.client.MinecraftClient.getInstance()
                         .setScreen(new AccountManagerScreen(self)))
                 .dimensions(this.width / 2 - 100, this.height - 48, 200, 20).build());

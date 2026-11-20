@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.session.Session;
+import dev.mycheat.mixin.MinecraftClientAccessor;
 import net.minecraft.text.Text;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +32,7 @@ public final class AccountManagerScreen extends Screen {
     }
 
     private Path accountFile() {
-        return FabricLoader.getInstance().getConfigDir().resolve("vetka_accounts.txt");
+        return VetkaPaths.config().resolve("vetka_accounts.txt");
     }
 
     @Override
@@ -92,7 +93,7 @@ public final class AccountManagerScreen extends Screen {
     private void switchTo(String username) {
         UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
         Session session = new Session(username, uuid, "", Optional.empty(), Optional.empty(), Session.AccountType.LEGACY);
-        MinecraftClient.getInstance().setSession(session);
+        ((MinecraftClientAccessor) (Object) MinecraftClient.getInstance()).vetka$setSession(session);
         status = "Switched to " + username + " (offline name).";
         client.setScreen(parent);
     }
