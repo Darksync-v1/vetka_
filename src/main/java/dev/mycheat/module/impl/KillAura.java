@@ -33,8 +33,8 @@ import java.util.List;
  */
 public class KillAura extends Module {
     // Main Aura settings (names and modes follow ThunderHack Recode where practical).
-    private final NumberSetting attackRange = add(new NumberSetting("Range", 3.1, 1.0, 6.0, 0.1));
-    private final NumberSetting wallRange = add(new NumberSetting("ThroughWallsRange", 3.1, 0.0, 6.0, 0.1));
+    private final NumberSetting attackRange = add(new NumberSetting("Range", 3.6, 1.0, 6.0, 0.1));
+    private final NumberSetting wallRange = add(new NumberSetting("ThroughWallsRange", 3.6, 0.0, 6.0, 0.1));
     private final NumberSetting elytraOverride = add(new NumberSetting("ElytraOverride", 0, 0, 1, 1));
     private final NumberSetting elytraAttackRange = add(new NumberSetting("ElytraRange", 3.1, 1.0, 6.0, 0.1));
     private final NumberSetting elytraWallRange = add(new NumberSetting("ElytraThroughWallsRange", 3.1, 0.0, 6.0, 0.1));
@@ -162,7 +162,8 @@ public class KillAura extends Module {
             if (attackShieldingEntities.getInt() == 0 && player.isBlocking()) return false;
         }
         double dist = distanceToBox(entity);
-        double allowed = mc().player.canSee(entity) ? range() : wallRange();
+        double managedRange = TargetManager.maxRange(range());
+        double allowed = mc().player.canSee(entity) ? managedRange : Math.min(wallRange(), managedRange);
         if (dist > allowed + aimRange.get()) return false;
         return fovAngle(entity) <= fov.get();
     }
@@ -170,7 +171,9 @@ public class KillAura extends Module {
     private Entity findTarget() {
         List<Entity> candidates = new ArrayList<>();
         for (Entity entity : mc().world.getEntities()) if (valid(entity)) candidates.add(entity);
-        Comparator<Entity> comparator = switch (sort.getInt()) {
+        int managedPriority = TargetManager.priority();
+        int selectedSort = managedPriority >= 0 ? (managedPriority == 1 ? 2 : managedPriority == 2 ? 3 : 0) : sort.getInt();
+        Comparator<Entity> comparator = switch (selectedSort) {
             case 1 -> Comparator.comparingDouble(this::distanceToBox).reversed();
             case 2 -> Comparator.comparingDouble(e -> ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount());
             case 3 -> Comparator.comparingDouble((Entity e) -> ((LivingEntity) e).getHealth() + ((LivingEntity) e).getAbsorptionAmount()).reversed();
@@ -303,7 +306,8 @@ public class KillAura extends Module {
             interactTicksLeft = 0;
         }
         if (hitTicks > 0 || player.getAttackCooldownProgress(0.5f) < attackCooldown.get()) return;
-        if (distanceToBox(target) > (player.canSee(target) ? range() : wallRange())) return;
+        double managedRange = TargetManager.maxRange(range());
+        if (distanceToBox(target) > (player.canSee(target) ? managedRange : Math.min(wallRange(), managedRange))) return;
         if (!criticalReady()) return;
         if (fastFall.getInt() == 1 && !player.isOnGround()) player.addVelocity(0.0, -pullValue.get() / 1000.0, 0.0);
         if (rayTrace.getInt() != 0 && !player.canSee(target) && distanceToBox(target) > wallRange()) return;

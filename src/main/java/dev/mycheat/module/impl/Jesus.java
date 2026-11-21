@@ -8,15 +8,15 @@ import net.minecraft.util.math.Vec3d;
 
 /**
  * Mode 0: «дельфин», ванильное всплытие +0.04 за тик.
- * Mode 1: твёрдая вода. FluidBlockMixin даёт воде коллизию высотой 0.88, поэтому ноги остаются
- * внутри блока воды (для NCP это «плавание»), а скорость ограничена слайдером Speed.
+ * Mode 1: твёрдая вода. FluidBlockMixin возвращает полную кубическую коллизию
+ * для водных блоков под игроком, чтобы по поверхности можно было ходить.
  */
 public class Jesus extends Module {
     private final NumberSetting mode = add(new NumberSetting("Mode", 1, 0, 1, 1));
     private final NumberSetting speed = add(new NumberSetting("Speed", 0.15, 0.05, 0.3, 0.01));
 
     public Jesus() {
-        super("Jesus", Category.MOVEMENT, "Хождение по воде. Mode 1 — твёрдая вода (стоишь на поверхности, скорость ограничена под NCP), Mode 0 — «дельфин». Shift — спуститься в воду.");
+        super("Jesus", Category.MOVEMENT, "Хождение по воде. Mode 1 — вода становится твёрдой поверхностью; Mode 0 — всплытие как дельфин. Shift — отключить коллизию воды.");
     }
 
     public static boolean solid() {

@@ -30,6 +30,12 @@ public class TotemAnimation extends Module {
     @Override protected void onEnable() { setPackEnabled(true); }
     @Override protected void onDisable() { setPackEnabled(false); }
 
+    @Override public void toggle() {
+        boolean wasEnabled = isEnabled();
+        super.toggle();
+        if (mc().player == null && wasEnabled != isEnabled()) setPackEnabled(isEnabled());
+    }
+
     private void setPackEnabled(boolean enabled) {
         try {
             Path packDir = FabricLoader.getInstance().getGameDir()

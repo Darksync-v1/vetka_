@@ -22,8 +22,10 @@ public class FluidBlockMixin {
                                     CallbackInfoReturnable<VoxelShape> cir) {
         if (!Jesus.solid()) return;
         var p = MinecraftClient.getInstance().player;
-        if (p == null || p.isSneaking() || !state.getFluidState().isIn(FluidTags.WATER) || !state.getFluidState().isStill()) return;
-        if (p.getY() < pos.getY() + 0.75 || !world.getFluidState(pos.up()).isEmpty()) return;
-        cir.setReturnValue(VoxelShapes.cuboid(0, 0, 0, 1, 0.88, 1));
+        if (p == null || p.isSneaking() || !state.getFluidState().isIn(FluidTags.WATER)) return;
+        // Делаем воду полноценной опорной поверхностью только для игрока,
+        // который находится над ней. Подводное движение и выход снизу остаются возможны.
+        if (p.getY() < pos.getY() + 0.5) return;
+        cir.setReturnValue(VoxelShapes.fullCube());
     }
 }
