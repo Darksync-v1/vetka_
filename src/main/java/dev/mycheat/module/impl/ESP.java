@@ -4,6 +4,7 @@ import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
 import dev.mycheat.util.Friends;
+import dev.mycheat.module.impl.AntiBot;
 import dev.mycheat.util.RenderUtil;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.entity.Entity;
@@ -27,7 +28,8 @@ public class ESP extends Module {
         // Vanilla glow is optional; the ESP box below does not depend on entity glowing metadata.
         if (glow.getInt() == 1) {
             for (Entity e : mc().world.getEntities()) {
-                if (e instanceof PlayerEntity pl && pl != mc().player) pl.setGlowing(true);
+                if (e instanceof PlayerEntity pl && pl != mc().player && pl.isAlive()
+                        && !AntiBot.isBot(pl)) pl.setGlowing(true);
             }
         }
     }
@@ -52,7 +54,8 @@ public class ESP extends Module {
 
         try {
             for (Entity entity : mc().world.getEntities()) {
-                if (!(entity instanceof PlayerEntity player) || player == mc().player || !player.isAlive()) continue;
+                if (!(entity instanceof PlayerEntity player) || player == mc().player || !player.isAlive()
+                        || player.isSpectator() || AntiBot.isBot(player)) continue;
 
                 double ix = MathHelper.lerp(tickDelta, entity.prevX, entity.getX());
                 double iy = MathHelper.lerp(tickDelta, entity.prevY, entity.getY());

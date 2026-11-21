@@ -4,6 +4,7 @@ import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
 import dev.mycheat.setting.NumberSetting;
 import dev.mycheat.util.Friends;
+import dev.mycheat.module.impl.AntiBot;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
@@ -33,6 +34,8 @@ public class AimBot extends Module {
         for (Entity entity : world.getEntities()) {
             if (!(entity instanceof PlayerEntity target) || target == self || !target.isAlive()
                     || target.isSpectator() || target.isCreative()) continue;
+            // Ignore fake-player/NPC entities even if the AntiBot module itself is switched off.
+            if (AntiBot.isBot(target)) continue;
             if (ignoreFriends.getInt() == 1 && Friends.isFriend(target)) continue;
             if (visibleOnly.getInt() == 1 && !self.canSee(target)) continue;
 
@@ -61,10 +64,18 @@ public class AimBot extends Module {
         double horizontal = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
         float wantedYaw = MathHelper.wrapDegrees((float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0));
         float wantedPitch = MathHelper.clamp((float) -Math.toDegrees(Math.atan2(delta.y, horizontal)), -90.0f, 90.0f);
-        float step = (float) speed.get();
-        float yaw = self.getYaw() + MathHelper.clamp(MathHelper.wrapDegrees(wantedYaw - self.getYaw()), -step, step);
-        float pitch = self.getPitch() + MathHelper.clamp(wantedPitch - self.getPitch(), -step * 0.65f, step * 0.65f);
-        self.setYaw(yaw);
-        self.setPitch(pitch);
+        // Exponential easing makes the camera converge smoothly instead of snapping by a
+        // fixed large number of degrees every tick. Higher Speed means faster convergence.
+        float responsiveness = 0.035f + (float) speed.get() * 0.0065f;
+        responsiveness = MathHelper.clamp(responsiveness, 0.04f, 0.32f);
+        float maxStep = 0.35f + (float) speed.get() * 0.18f;
+
+        float yawDelta = MathHelper.wrapDegrees(wantedYaw - self.getYaw());
+        float pitchDelta = wantedPitch - self.getPitch();
+        float yawStep = MathHelper.clamp(yawDelta * responsiveness, -maxStep, maxStep);
+        float pitchStep = MathHelper.clamp(pitchDelta * responsiveness, -maxStep * 0.75f, maxStep * 0.75f);
+
+        self.setYaw(self.getYaw() + yawStep);
+        self.setPitch(MathHelper.clamp(self.getPitch() + pitchStep, -90.0f, 90.0f));
     }
 }
