@@ -71,7 +71,8 @@ public class TargetStrafe extends Module {
         double dz = player.getZ() - target.getZ();
         double distance = Math.hypot(dx, dz);
         if (distance < 1.0E-4) return;
-        int side = directionMode.getInt() == 2 ? -1 : direction;
+        int mode = directionMode.getInt();
+        int side = mode == 1 ? 1 : mode == 2 ? -1 : direction;
         double tangentX = -dz / distance * side;
         double tangentZ = dx / distance * side;
         Vec3d velocity = player.getVelocity();

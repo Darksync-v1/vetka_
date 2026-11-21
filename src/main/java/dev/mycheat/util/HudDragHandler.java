@@ -30,7 +30,7 @@ public final class HudDragHandler {
                 new Widget("fps",5,33,90,18,enabled(FPS.class)),
                 new Widget("ping",5,53,110,18,enabled(PingHUD.class)),
                 new Widget("keystrokes",8,sh-92,116,92,enabled(Keystrokes.class)),
-                new Widget("potions",sw-142,8,134,176,enabled(PotionHUD.class)),
+                new Widget("potions",sw-126,8,118,112,enabled(PotionHUD.class)),
                 new Widget("armor",sw/2-74,sh-58,90,24,enabled(ArmorStatus.class)),
                 new Widget("target",sw/2-78,sh/2+34,156,42,enabled(TargetHUD.class))
         };
@@ -74,7 +74,7 @@ public final class HudDragHandler {
             case "fps" -> new int[]{90,18};
             case "ping" -> new int[]{110,18};
             case "keystrokes" -> new int[]{116,92};
-            case "potions" -> new int[]{134,176};
+            case "potions" -> new int[]{118,112};
             case "armor" -> new int[]{90,24};
             case "target" -> new int[]{156,42};
             default -> new int[]{1,1};

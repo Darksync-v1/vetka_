@@ -17,7 +17,7 @@ public final class HudEditorScreen extends Screen {
             new Widget("fps","FPS",5,33,90,18),
             new Widget("ping","Ping",5,53,110,18),
             new Widget("keystrokes","Keystrokes + CPS",8, heightSafe()-92,116,92),
-            new Widget("potions","PotionHUD",widthSafe()-142,8,134,66),
+            new Widget("potions","Potions",14,130,118,112),
             new Widget("armor","ArmorStatus",widthSafe()/2-74,heightSafe()-58,90,24),
             new Widget("target","Target Info",widthSafe()/2-78,heightSafe()/2+34,156,42)
     );

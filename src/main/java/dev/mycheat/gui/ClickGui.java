@@ -45,6 +45,19 @@ public class ClickGui extends Screen {
         double v = s.get();
         return v == Math.rint(v) ? String.valueOf((long) v) : String.format("%.2f", v);
     }
+
+    private static String settingLabel(Module module, NumberSetting setting) {
+        if (module.getName().equals("TargetStrafe") && setting.name.equals("Direction")) {
+            String[] modes = {"Auto", "Right", "Left", "Toward", "Away"};
+            int index = Math.max(0, Math.min(modes.length - 1, setting.getInt()));
+            return "Direction: " + modes[index];
+        }
+        if (module.getName().equals("Aura") && setting.name.equals("AutoAim")) {
+            return "AutoAim: " + (setting.getInt() == 1 ? "On" : "Off");
+        }
+        return setting.name + "  " + fmt(setting);
+    }
+
     private void panel(DrawContext ctx, int x, int y, Category category, int mx, int my, float delta) {
         int bottom = y + PANEL_H;
         int contentTop = y + HEADER_H + 5;
@@ -96,7 +109,7 @@ public class ClickGui extends Screen {
                         ctx.fill(x + 9, st, x + PANEL_W - 9, sb, 0xD014151D);
                         int barW = (int)((PANEL_W - 18) * setting.normalized());
                         ctx.fill(x + 9, sb - 2, x + 9 + barW, sb, ACCENT);
-                        String label = setting.name + "  " + fmt(setting);
+                        String label = settingLabel(m, setting);
                         ctx.drawTextWithShadow(textRenderer, label, x + 13, st + 4, 0xFFD0CDDA);
                         regions.add(new Region(x + 9, Math.max(st, contentTop), x + PANEL_W - 9, Math.min(sb, contentBottom), null, setting, null));
                     }

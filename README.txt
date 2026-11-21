@@ -18,3 +18,20 @@ Combat additions:
 - Aura: AutoAim enables/disables automatic aiming; AimSpeed controls the smooth rotation step when RotationMode=Track (0).
 - TargetStrafe: Direction 0=Auto (switches side after collision), 1=Right, 2=Left, 3=Toward target, 4=Away from target. Speed and Radius control orbit movement.
 - TargetStrafe follows the active Aura/ElytraAura target. Aura only publishes a target while it passes its configured FOV and range checks, so strafing stops when no valid target remains.
+
+Combat and HUD controls
+-----------------------
+Aura (Combat): enable the module, then leave AutoAim at 1 (On) to rotate toward
+the selected valid target. Target categories, FOV, range, aim speed and rotation
+mode can be adjusted by right-clicking Aura in the ClickGUI. AutoAim only works
+while Aura is enabled and a valid target is selected.
+
+TargetStrafe (Combat): enable Aura and TargetStrafe together. Open TargetStrafe
+settings and set Direction to Auto, Right, Left, Toward or Away. Right and Left
+force a consistent orbit direction; Auto reverses when colliding with a wall.
+Speed and Radius control the orbit.
+
+Movable HUD: press F8 to open the HUD Editor, then left-click and drag a widget.
+Press ESC to save and close. PotionHUD's editor area is sized for up to eight
+effect rows. Alternatively, while the chat screen is open, right-click and drag
+a visible HUD widget. Positions are saved in the Vetka config file.
