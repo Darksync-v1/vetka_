@@ -81,8 +81,8 @@ public final class HudDragHandler {
         };
     }
 
-    private static <T> boolean enabled(Class<T> type) {
-        T module=MyCheat.MODULES.get(type);
-        return module instanceof dev.mycheat.module.Module m && m.isEnabled();
+    private static <T extends dev.mycheat.module.Module> boolean enabled(Class<T> type) {
+        T module = MyCheat.MODULES.get(type);
+        return module != null && module.isEnabled();
     }
 }
