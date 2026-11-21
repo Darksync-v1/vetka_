@@ -32,6 +32,15 @@ public final class Config {
             } catch (NumberFormatException ignored) {}
         }
         for (String n : p.getProperty("friends", "").split(",")) if (!n.isBlank()) Friends.add(n.trim());
+        String[] hudIds = {"coordinates","fps","ping","keystrokes","potions","armor","target"};
+        for (String id : hudIds) {
+            String value = p.getProperty("hud." + id);
+            if (value != null) {
+                String[] xy = value.split(",");
+                if (xy.length == 2) try { HudPositions.set(id, Integer.parseInt(xy[0]), Integer.parseInt(xy[1])); }
+                catch (NumberFormatException ignored) {}
+            }
+        }
         var hudNew = MyCheat.MODULES.get(dev.mycheat.module.impl.VetkaHudNew.class);
         if (hudNew != null && Boolean.parseBoolean(p.getProperty("gui.vetkaHudNew", "false")) && !hudNew.isEnabled()) hudNew.toggle();
     }
@@ -45,6 +54,10 @@ public final class Config {
             for (TextSetting s : m.getTextSettings()) p.setProperty("text." + m.getName() + "." + s.name, s.get());
         }
         p.setProperty("friends", String.join(",", Friends.all()));
+        for (var entry : HudPositions.all().entrySet()) {
+            int[] xy = entry.getValue();
+            p.setProperty("hud." + entry.getKey(), xy[0] + "," + xy[1]);
+        }
         var hudNew = MyCheat.MODULES.get(dev.mycheat.module.impl.VetkaHudNew.class);
         if (hudNew != null) p.setProperty("gui.vetkaHudNew", String.valueOf(hudNew.isEnabled()));
         try {

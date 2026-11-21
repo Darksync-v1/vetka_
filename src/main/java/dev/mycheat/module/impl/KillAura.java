@@ -41,6 +41,8 @@ public class KillAura extends Module {
     private final NumberSetting fov = add(new NumberSetting("FOV", 180, 1, 180, 1));
     // RotationMode: 0=Track, 1=Grim(packet), 2=Interact(track), 3=None.
     private final NumberSetting rotationMode = add(new NumberSetting("RotationMode", 0, 0, 3, 1));
+    private final NumberSetting autoAim = add(new NumberSetting("AutoAim", 1, 0, 1, 1));
+    private final NumberSetting aimSpeed = add(new NumberSetting("AimSpeed", 70, 5, 180, 1));
     private final NumberSetting interactTicks = add(new NumberSetting("InteractTicks", 3, 1, 10, 1));
     // AutoWeapon: 0=None, 1=Normal, 2=Silent (hotbar-only packet switch).
     private final NumberSetting autoWeapon = add(new NumberSetting("AutoWeapon", 0, 0, 2, 1));
@@ -195,14 +197,14 @@ public class KillAura extends Module {
     }
 
     private void rotateTo(Entity entity) {
-        if (rotationMode.getInt() == 3) return;
+        if (autoAim.getInt() == 0 || rotationMode.getInt() == 3) return;
         Vec3d eyes = mc().player.getEyePos();
         Vec3d point = entity.getBoundingBox().getCenter();
         double dx = point.x - eyes.x, dy = point.y - eyes.y, dz = point.z - eyes.z;
         float wantedYaw = MathHelper.wrapDegrees((float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0));
         float wantedPitch = MathHelper.clamp((float) -Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz))), -90, 90);
-        float yawStep = rotationMode.getInt() == 0 ? 70f : 180f;
-        float pitchStep = rotationMode.getInt() == 0 ? 12f : 90f;
+        float yawStep = rotationMode.getInt() == 0 ? (float) aimSpeed.get() : 180f;
+        float pitchStep = rotationMode.getInt() == 0 ? Math.max(2f, (float) aimSpeed.get() * 0.18f) : 90f;
         rotationYaw += MathHelper.clamp(MathHelper.wrapDegrees(wantedYaw - rotationYaw), -yawStep, yawStep);
         rotationPitch += MathHelper.clamp(wantedPitch - rotationPitch, -pitchStep, pitchStep);
         if (clientLook.getInt() == 1 || rotationMode.getInt() == 0 || rotationMode.getInt() == 2) {

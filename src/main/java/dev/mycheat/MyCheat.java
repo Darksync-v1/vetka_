@@ -2,6 +2,7 @@ package dev.mycheat;
 
 import dev.mycheat.gui.ClickGui;
 import dev.mycheat.gui.VetkaHudNewGui;
+import dev.mycheat.gui.HudEditorScreen;
 import dev.mycheat.module.impl.VetkaHudNew;
 import dev.mycheat.module.Module;
 import dev.mycheat.module.ModuleManager;
@@ -31,6 +32,7 @@ import org.lwjgl.glfw.GLFW;
 public class MyCheat implements ClientModInitializer {
     public static final ModuleManager MODULES = new ModuleManager();
     private static KeyBinding guiKey;
+    private static KeyBinding hudEditorKey;
     private static boolean middleDown;
     private static double savedFov = -1;
     private static long lastConfigSaveNanos;
@@ -42,7 +44,9 @@ public class MyCheat implements ClientModInitializer {
         lastConfigSaveNanos = System.nanoTime();
         guiKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mycheat.gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "category.mycheat"));
-        WorldRenderEvents.LAST.register(ctx -> {
+        hudEditorKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.mycheat.hud_editor", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F8, "category.mycheat"));
+        WorldRenderEvents.AFTER_ENTITIES.register(ctx -> {
             TargetESP tesp = MODULES.get(TargetESP.class);
             if (tesp != null && tesp.isEnabled()) tesp.render(ctx);
             ESP esp = MODULES.get(ESP.class);
@@ -66,6 +70,7 @@ public class MyCheat implements ClientModInitializer {
                 lastConfigSaveNanos = now;
             }
             while (guiKey.wasPressed()) { VetkaHudNew mode = MODULES.get(VetkaHudNew.class); mc.setScreen(mode != null && mode.isEnabled() ? new VetkaHudNewGui() : new ClickGui()); }
+            while (hudEditorKey.wasPressed()) mc.setScreen(new HudEditorScreen());
             if (mc.player == null || mc.world == null) {
                 restoreZoom(mc);
                 return;

@@ -11,7 +11,8 @@
     "TitleScreenMixin",
     "IncomingPacketsMixin",
     "CobwebMixin",
-    "MinecraftClientAccessor"
+    "MinecraftClientAccessor",
+    "ScreenHudDragMixin"
   ],
   "injectors": {
     "defaultRequire": 0

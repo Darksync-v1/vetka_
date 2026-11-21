@@ -2,6 +2,7 @@ package dev.mycheat.module.impl;
 
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
+import dev.mycheat.util.HudPositions;
 import net.minecraft.client.gui.DrawContext;
 
 /** Координаты и направление игрока в HUD. */
@@ -12,8 +13,9 @@ public class Coordinates extends Module {
         var p = mc().player;
         String line = String.format("XYZ: %.1f  %.1f  %.1f", p.getX(), p.getY(), p.getZ());
         String facing = "Facing: " + p.getHorizontalFacing().asString().toUpperCase();
-        ctx.fill(5, 5, 150, 29, 0x88090912);
-        ctx.drawTextWithShadow(mc().textRenderer, line, 9, 8, 0xFFFFFFFF);
-        ctx.drawTextWithShadow(mc().textRenderer, facing, 9, 18, 0xFFB8B8C8);
+        int x=HudPositions.x("coordinates",5), y=HudPositions.y("coordinates",5);
+        ctx.fill(x, y, x+150, y+25, 0xCC171923);
+        ctx.drawTextWithShadow(mc().textRenderer, line, x+4, y+3, 0xFFFFFFFF);
+        ctx.drawTextWithShadow(mc().textRenderer, facing, x+4, y+14, 0xFFB8B8C8);
     }
 }

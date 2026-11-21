@@ -2,6 +2,7 @@ package dev.mycheat.module.impl;
 
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
+import dev.mycheat.util.HudPositions;
 import net.minecraft.client.gui.DrawContext;
 import org.lwjgl.glfw.GLFW;
 
@@ -22,7 +23,7 @@ public class Keystrokes extends Module {
         oldLeft = left; oldRight = right;
         if (now - leftWindow >= 1000) { leftCps = leftClicks; leftClicks = 0; leftWindow = now; }
         if (now - rightWindow >= 1000) { rightCps = rightClicks; rightClicks = 0; rightWindow = now; }
-        int x=8, y=mc().getWindow().getScaledHeight()-92;
+        int x=HudPositions.x("keystrokes",8), y=HudPositions.y("keystrokes",mc().getWindow().getScaledHeight()-92);
         key(ctx,"W",x+25,y,GLFW.glfwGetKey(win,GLFW.GLFW_KEY_W)==1);
         key(ctx,"A",x,y+23,GLFW.glfwGetKey(win,GLFW.GLFW_KEY_A)==1);
         key(ctx,"S",x+25,y+23,GLFW.glfwGetKey(win,GLFW.GLFW_KEY_S)==1);

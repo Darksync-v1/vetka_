@@ -14,6 +14,7 @@ public final class RenderUtil {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
         RenderSystem.lineWidth(2.0f);
 
         float x1 = (float) b.minX, y1 = (float) b.minY, z1 = (float) b.minZ;
@@ -31,6 +32,7 @@ public final class RenderUtil {
         }
         BufferRenderer.drawWithGlobalProgram(buf.end());
         RenderSystem.lineWidth(1.0f);
+        RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
     }

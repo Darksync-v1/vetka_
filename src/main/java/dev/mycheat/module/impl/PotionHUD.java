@@ -2,6 +2,7 @@ package dev.mycheat.module.impl;
 
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
+import dev.mycheat.util.HudPositions;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.effect.StatusEffectInstance;
 
@@ -10,7 +11,7 @@ public class PotionHUD extends Module {
     public PotionHUD(){ super("PotionHUD", Category.RENDER, "Показывает эффекты зелий и оставшееся время."); }
     public void render(DrawContext ctx){
         if(!isEnabled() || mc().player==null) return;
-        int x=mc().getWindow().getScaledWidth()-142, y=8, rows=0;
+        int x=HudPositions.x("potions",mc().getWindow().getScaledWidth()-142), y=HudPositions.y("potions",8), rows=0;
         for(StatusEffectInstance effect:mc().player.getStatusEffects()){
             if(rows>=8) break;
             String name=effect.getEffectType().value().getName().getString();

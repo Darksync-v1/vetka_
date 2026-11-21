@@ -2,6 +2,7 @@ package dev.mycheat.module.impl;
 
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
+import dev.mycheat.util.HudPositions;
 import dev.mycheat.module.Targets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -49,8 +50,8 @@ public final class TargetHUD extends Module {
 
         int panelWidth = 156;
         int panelHeight = 42;
-        int x = (mc.getWindow().getScaledWidth() - panelWidth) / 2;
-        int y = mc.getWindow().getScaledHeight() / 2 + 34;
+        int x = HudPositions.x("target",(mc.getWindow().getScaledWidth()-panelWidth)/2);
+        int y = HudPositions.y("target",mc.getWindow().getScaledHeight()/2+34);
 
         // Dark, subtle ThunderHack-inspired panel with a violet accent.
         ctx.fill(x, y, x + panelWidth, y + panelHeight, 0xE9161720);

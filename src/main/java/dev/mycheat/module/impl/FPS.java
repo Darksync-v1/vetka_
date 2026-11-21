@@ -2,6 +2,7 @@ package dev.mycheat.module.impl;
 
 import dev.mycheat.module.Category;
 import dev.mycheat.module.Module;
+import dev.mycheat.util.HudPositions;
 import net.minecraft.client.gui.DrawContext;
 
 /** FPS counter in the HUD. */
@@ -10,7 +11,8 @@ public class FPS extends Module {
     public void render(DrawContext ctx) {
         if (!isEnabled()) return;
         String value = "FPS: " + mc().getCurrentFps();
-        ctx.fill(5, 33, 65, 46, 0x88090912);
-        ctx.drawTextWithShadow(mc().textRenderer, value, 9, 36, 0xFF80E8FF);
+        int x=HudPositions.x("fps",5), y=HudPositions.y("fps",33);
+        ctx.fill(x,y,x+70,y+16,0xCC171923);
+        ctx.drawTextWithShadow(mc().textRenderer,value,x+4,y+4,0xFF80E8FF);
     }
 }

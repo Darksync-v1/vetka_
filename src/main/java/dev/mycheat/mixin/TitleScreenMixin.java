@@ -8,14 +8,13 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import dev.mycheat.gui.AccountManagerScreen;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Custom image background and Vetka title while keeping the vanilla title-screen buttons. */
+/** Solid-black Vetka title screen with Account Manager replacing the Realms slot. */
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin extends Screen {
     protected TitleScreenMixin(Text title) { super(title); }
@@ -23,24 +22,33 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"), require = 0)
     private void vetka$accountManagerButton(CallbackInfo ci) {
-        // Remove the Realms entry without changing the other vanilla buttons.
-        this.children().removeIf(element ->
-                element instanceof ButtonWidget button
-                        && button.getMessage().getString().toLowerCase(java.util.Locale.ROOT).contains("realms"));
-
         TitleScreen self = (TitleScreen) (Object) this;
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Account Manager"),
-                button -> net.minecraft.client.MinecraftClient.getInstance()
-                        .setScreen(new AccountManagerScreen(self)))
-                .dimensions(this.width / 2 - 100, this.height - 48, 200, 20).build());
+        java.util.List<ButtonWidget> realms = this.children().stream()
+                .filter(element -> element instanceof ButtonWidget)
+                .map(element -> (ButtonWidget) element)
+                .filter(button -> button.getMessage().getString().toLowerCase(java.util.Locale.ROOT).contains("realms"))
+                .toList();
+        if (!realms.isEmpty()) {
+            ButtonWidget old = realms.get(0);
+            int x = old.getX(), y = old.getY(), w = old.getWidth(), h = old.getHeight();
+            this.remove(old);
+            this.addDrawableChild(ButtonWidget.builder(Text.literal("Account Manager"),
+                    button -> net.minecraft.client.MinecraftClient.getInstance()
+                            .setScreen(new AccountManagerScreen(self)))
+                    .dimensions(x, y, w, h).build());
+        } else {
+            this.addDrawableChild(ButtonWidget.builder(Text.literal("Account Manager"),
+                    button -> net.minecraft.client.MinecraftClient.getInstance()
+                            .setScreen(new AccountManagerScreen(self)))
+                    .dimensions(this.width / 2 - 100, this.height - 48, 200, 20).build());
+        }
     }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true, require = 0)
     private void vetka$theme(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         ci.cancel();
-        // Replace the old black title-screen background with the client background image.
-        context.drawTexture(Identifier.of("mycheat", "textures/gui/vetka_bg.png"),
-                0, 0, 0, 0, this.width, this.height, 3840, 2160);
+        // Solid black background as requested.
+        context.fill(0, 0, this.width, this.height, 0xFF000000);
 
         float scale = 4f;
         context.getMatrices().push();
