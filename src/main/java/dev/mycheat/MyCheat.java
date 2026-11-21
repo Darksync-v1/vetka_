@@ -31,7 +31,8 @@ import org.lwjgl.glfw.GLFW;
 public class MyCheat implements ClientModInitializer {
     public static final ModuleManager MODULES = new ModuleManager();
     private static KeyBinding guiKey;
-    private static boolean middleDown;\n    private static double savedFov = -1;
+    private static boolean middleDown;
+    private static double savedFov = -1;
     private static long lastConfigSaveNanos;
     private static final long CONFIG_AUTOSAVE_INTERVAL_NANOS = 10L * 60L * 1_000_000_000L;
 
