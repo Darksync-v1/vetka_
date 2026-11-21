@@ -1,0 +1,30 @@
+{
+  "entity.generic.eat": {
+    "replace": true,
+    "subtitle": "subtitles.entity.generic.eat",
+    "sounds": [
+      {
+        "name": "random/eat1",
+        "volume": 0.8
+      },
+      {
+        "name": "random/eat2",
+        "volume": 0.8
+      },
+      {
+        "name": "random/eat3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.player.burp": {
+    "replace": true,
+    "subtitle": "subtitles.entity.player.burp",
+    "sounds": [
+      {
+        "name": "random/burp",
+        "volume": 0.8
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+TotemAnimation module
+=====================
+
+Enable the TotemAnimation module in the Render category. Vetka installs the bundled
+Minecraft 1.21.1 resource pack into .minecraft/resourcepacks/Vetka-Totem-Animation,
+enables it, and reloads resources. Disable the module to disable the pack.
+
+The resource pack changes the Totem of Undying texture, display transforms, and
+item.totem.use sound. The model was adapted from the supplied 1.21.8 pack metadata
+to the 1.21.1 resource-pack format.
