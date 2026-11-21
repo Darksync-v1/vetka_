@@ -10,10 +10,10 @@ public class ModuleManager {
             new TargetStrafe(), new AutoTotem(), new Velocity(),
             new Sprint(), new Fly(), new Speed(), new Step(), new Jesus(), new ElytraFly(),
             new Phase(), new ClickTP(), new NoFall(),
-            new Fullbright(), new ESP(), new TargetESP(), new TargetHUD(), new Crosshair(), new Coordinates(), new FPS(), new ArmorStatus(), new ChinaHat(), new NameTags(),
+            new Fullbright(), new ESP(), new TargetESP(), new TargetHUD(), new Crosshair(), new Coordinates(), new FPS(), new ArmorStatus(), new Keystrokes(), new PotionHUD(), new PingHUD(), new ChinaHat(), new NameTags(),
             new Boost(), new NoSlow(), new NoWeb(), new AutoEZ(), new PhotoMath(), new MessageAppend(), new MessagePrefix(),
             new NoServerRotate(), new NoServerSlot(), new GuiMove(), new VetkaHudNew(),
-            new AntiWeb(), new Reach(), new GroundBoost(), new TpsSync(), new Femboy());
+            new AntiWeb(), new Reach(), new TpsSync());
 
     public List<Module> getAll() { return modules; }
 

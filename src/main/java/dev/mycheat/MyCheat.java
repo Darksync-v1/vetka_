@@ -31,7 +31,7 @@ import org.lwjgl.glfw.GLFW;
 public class MyCheat implements ClientModInitializer {
     public static final ModuleManager MODULES = new ModuleManager();
     private static KeyBinding guiKey;
-    private static boolean middleDown;
+    private static boolean middleDown;\n    private static double savedFov = -1;
     private static long lastConfigSaveNanos;
     private static final long CONFIG_AUTOSAVE_INTERVAL_NANOS = 10L * 60L * 1_000_000_000L;
 
@@ -65,10 +65,33 @@ public class MyCheat implements ClientModInitializer {
                 lastConfigSaveNanos = now;
             }
             while (guiKey.wasPressed()) { VetkaHudNew mode = MODULES.get(VetkaHudNew.class); mc.setScreen(mode != null && mode.isEnabled() ? new VetkaHudNewGui() : new ClickGui()); }
-            if (mc.player == null || mc.world == null) return;
+            if (mc.player == null || mc.world == null) {
+                restoreZoom(mc);
+                return;
+            }
+            updateZoom(mc);
             if (mc.currentScreen == null) handleInput(mc);
             MODULES.tick(mc);
         });
+    }
+
+
+    private static void updateZoom(MinecraftClient mc) {
+        boolean held = mc.currentScreen == null
+                && org.lwjgl.glfw.GLFW.glfwGetKey(mc.getWindow().getHandle(), org.lwjgl.glfw.GLFW.GLFW_KEY_C) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
+        if (held) {
+            if (savedFov < 0) savedFov = mc.options.getFov().getValue();
+            mc.options.getFov().setValue(25);
+        } else {
+            restoreZoom(mc);
+        }
+    }
+
+    private static void restoreZoom(MinecraftClient mc) {
+        if (savedFov >= 0) {
+            mc.options.getFov().setValue((int) savedFov);
+            savedFov = -1;
+        }
     }
 
     private static void handleInput(MinecraftClient mc) {
@@ -111,6 +134,12 @@ public class MyCheat implements ClientModInitializer {
         if (armor != null) armor.render(ctx);
         var targetHud = MODULES.get(dev.mycheat.module.impl.TargetHUD.class);
         if (targetHud != null && targetHud.isEnabled()) targetHud.render(ctx);
+        var keys = MODULES.get(dev.mycheat.module.impl.Keystrokes.class);
+        if (keys != null) keys.render(ctx);
+        var potions = MODULES.get(dev.mycheat.module.impl.PotionHUD.class);
+        if (potions != null) potions.render(ctx);
+        var ping = MODULES.get(dev.mycheat.module.impl.PingHUD.class);
+        if (ping != null) ping.render(ctx);
         MinecraftClient client = MinecraftClient.getInstance();
         var tr = client.textRenderer;
         int y = 4;
