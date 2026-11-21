@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ModuleManager {
     private final List<Module> modules = List.of(
-            new KillAura(), new AimBot(), new ElytraAura(), new Criticals(), new AntiBot(),
+            new KillAura(), new AimBot(), new ElytraAura(), new Criticals(), new AntiBot(), new TotemAnimation(), new PVPTools(),
             new TargetStrafe(), new AutoTotem(), new Velocity(),
             new Sprint(), new Fly(), new Speed(), new Step(), new Jesus(), new ElytraFly(),
             new Phase(), new ClickTP(), new NoFall(),
